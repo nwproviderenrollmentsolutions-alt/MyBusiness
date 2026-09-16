@@ -351,7 +351,7 @@ reproducible, and every record they produce is flagged `is_mock`.
 | # | Milestone | Acceptance criteria |
 |---|---|---|
 | ~~1~~ | ~~**Core infrastructure**~~ | **Done.** Models + migration applied; queue leases/retries/recovers under concurrency; outbox dispatches once; policy engine correct at boundaries; approval gate pauses and resumes a task; tool registry denies unlisted tools; audit log captures every transition; 143 tests + ruff + mypy green |
-| 2 | Agent runtime + Chief of Staff | Worker executes registered agents with timeout/retry/cost tracking; CEO command translated into tasks |
+| ~~2~~ | ~~**Agent runtime + Chief of Staff**~~ | **Done.** Chief of Staff interprets CEO commands (deterministic pattern matching, not an LLM — see agents/chief_of_staff/interpreter.py), answers status/decision queries from the database, executes kill-switch and campaign-control commands directly, and dispatches to a domain agent when one is registered — checked against the live registry, so a command needing an agent that doesn't exist yet is reported BLOCKED rather than faked. `cli/ceo.py` is the CEO's working interface until the Milestone 6 dashboard exists. 176 tests + ruff + mypy green |
 | 3 | Discovery chain | Opportunity Discovery → Lead Discovery → Enrichment → Scoring on mock providers |
 | 4 | Outreach chain | Outreach drafts → approval → simulated send; Conversation Management handles a mock reply |
 | 5 | Close chain | Qualification → Sales → Proposal → approval → Customer |

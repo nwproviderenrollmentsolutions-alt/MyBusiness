@@ -11,11 +11,27 @@ the state machines, the security posture, and the milestone plan.
 | Milestone | State |
 |---|---|
 | 1. Core infrastructure | **complete** — 143 tests, ruff + mypy strict green |
-| 2. Agent runtime + Chief of Staff | not started |
+| 2. Agent runtime + Chief of Staff | **complete** — 176 tests, ruff + mypy strict green |
 | 3–5. Revenue vertical slice | not started |
-| 6. CEO dashboard + command interface | not started |
+| 6. CEO dashboard (web) | not started — a CLI (`cli/ceo.py`) covers the CEO interface for now |
 | 7. Simulated end-to-end test | not started |
 | 8. Real providers | not started |
+
+## CEO command line
+
+```bash
+python -m cli.ceo command "what's our status?"
+python -m cli.ceo commands              # recent command history
+python -m cli.ceo approvals             # pending approval queue
+python -m cli.ceo approve <id> --notes "looks good"
+python -m cli.ceo reject <id> --notes "not yet"
+python -m cli.ceo stop                  # global emergency stop — bypasses everything else
+python -m cli.ceo go                    # release the emergency stop
+python -m cli.ceo work                  # drain the task queue once
+```
+
+No domain agents exist yet, so commands like "find our best market opportunity" come back
+`BLOCKED` with the name of the agent that would handle it — not a fake success.
 
 **Everything that touches the outside world is currently mocked.** No email is sent, no
 lead source is queried, no payment is taken. Mock providers are labeled `MOCK` in their
