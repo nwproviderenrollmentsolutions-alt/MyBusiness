@@ -1,0 +1,19 @@
+# Agent registry. The worker resolves `agent` on a task to an entry here.
+#
+# Shape of an entry:
+#
+#   lead_scoring:
+#     module: agents.lead_scoring.agent      # must expose AGENT: Agent
+#     enabled: true
+#     concurrency: 2                          # max simultaneous runs
+#     subscribes_to:                          # event types that create a task for this agent
+#       - lead.enriched
+#
+# Timeouts, retries, tool allowlists, and approval requirements live in each
+# agent's own manifest (agents/<name>/manifest.py) next to the code they govern,
+# so an agent cannot be deployed without declaring them. This file controls
+# wiring: what is turned on and what it listens to.
+#
+# Empty until Milestone 2. No agents are implemented yet.
+
+agents: {}

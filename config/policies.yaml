@@ -1,0 +1,58 @@
+# Business policy. The CEO edits this file; no code changes required.
+#
+# autonomy modes:
+#   approval_required  - agent may prepare the action, a human must approve execution
+#   autonomous         - agent may execute without approval, subject to limits below
+#   disabled           - action may not be taken at all
+#
+# Default posture for every action that touches the outside world is
+# approval_required. Moving one to `autonomous` is a deliberate CEO decision and
+# is recorded in the audit log when the policy is loaded and changed.
+
+version: 1
+
+autonomy:
+  # --- Internal / no external side effect: safe to run autonomously ---
+  opportunity.discover: autonomous
+  lead.discover: autonomous
+  lead.enrich: autonomous
+  lead.score: autonomous
+  research.web_fetch: autonomous
+  proposal.draft: autonomous
+  deal.update_stage: autonomous
+  crm.sync: autonomous
+
+  # --- External world: approval required until explicitly enabled ---
+  outreach.send_email: approval_required
+  outreach.send_followup: approval_required
+  conversation.reply: approval_required
+  meeting.schedule: approval_required
+  proposal.send: approval_required
+  customer.create: approval_required
+
+  # --- Money: approval required regardless of other settings (see policy.py) ---
+  deal.apply_discount: approval_required
+  payment.charge: approval_required
+
+thresholds:
+  # Above these values an action needs approval even if marked autonomous.
+  deal_value_requires_approval_usd: 1000
+  proposal_value_requires_approval_usd: 1000
+  discount_pct_requires_approval: 10
+
+limits:
+  # Volume ceilings. These are safety rails, not targets. The system optimizes
+  # for qualified conversations, never for hitting these numbers.
+  global_daily_outbound_max: 50
+  campaign_daily_outbound_max: 25
+  per_prospect_max_touches: 4
+  per_prospect_cooldown_hours: 72
+
+cost_caps:
+  global_daily_usd: 25.0
+  per_run_usd: 1.0
+
+approval:
+  default_expiry_hours: 72
+  # What happens when an approval expires unanswered. Never "approve".
+  on_expiry: reject
