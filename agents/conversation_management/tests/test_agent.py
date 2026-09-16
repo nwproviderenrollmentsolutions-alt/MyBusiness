@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 import pytest
 from sqlalchemy import select
@@ -18,6 +19,7 @@ from db.enums import (
 )
 from db.models.market import Company, Prospect
 from db.models.pipeline import Conversation, Lead, Message
+from db.models.revenue import Deal, Proposal
 from db.models.runtime import AgentRun, AgentTask, OutboxEvent
 from db.session import session_scope
 from providers.factory import get_email_provider
@@ -185,6 +187,70 @@ def test_no_replies_is_a_clean_success(db):
             "skipped_duplicate": 0,
             "unmatched": 0,
         }
+
+
+def _sent_proposal(*, provider_message_id: str = "mock-proposal-1") -> tuple[uuid.UUID, uuid.UUID]:
+    """A qualified deal with a completed outbound proposal message. Returns
+    (deal_id, lead_id)."""
+    lead_id, conversation_id = _sent_outreach(provider_message_id=f"outreach-{provider_message_id}")
+    with session_scope() as session:
+        deal = Deal(lead_id=lead_id, value_usd=Decimal("4200"), is_mock=True)
+        session.add(deal)
+        session.flush()
+        proposal = Proposal(deal_id=deal.id, version=1, title="MOCK Proposal", is_mock=True)
+        session.add(proposal)
+        session.flush()
+        outbound = Message(
+            conversation_id=conversation_id,
+            lead_id=lead_id,
+            proposal_id=proposal.id,
+            direction=MessageDirection.OUTBOUND,
+            channel=Channel.EMAIL,
+            state=ActionState.COMPLETED,
+            subject="Proposal",
+            body="MOCK proposal body",
+            provider_message_id=provider_message_id,
+            idempotency_key=f"key-{provider_message_id}",
+            is_mock=True,
+        )
+        session.add(outbound)
+        session.flush()
+        return deal.id, lead_id
+
+
+def test_a_reply_to_a_proposal_emits_proposal_reply_received_not_conversation(db):
+    deal_id, lead_id = _sent_proposal()
+    get_email_provider().seed_reply(
+        from_email="sam@acme.invalid",
+        body="MOCK: sounds good, let's proceed",
+        in_reply_to="mock-proposal-1",
+    )
+
+    task = _enqueue()
+    status = runner.execute_task(task.id, worker_id="w1")
+    assert status is RunStatus.SUCCEEDED
+
+    with session_scope() as session:
+        assert (
+            session.scalar(
+                select(OutboxEvent).where(OutboxEvent.event_type == "conversation.reply_received")
+            )
+            is None
+        )
+        event = session.scalar(
+            select(OutboxEvent).where(OutboxEvent.event_type == "proposal.reply_received")
+        )
+        assert event is not None
+        assert event.payload["deal_id"] == str(deal_id)
+        assert event.payload["lead_id"] == str(lead_id)
+
+        proposal_id = event.payload["proposal_id"]
+        inbound = session.scalar(
+            select(Message).where(Message.direction == MessageDirection.INBOUND)
+        )
+        assert event.payload["message_id"] == str(inbound.id)
+        proposal = session.get(Proposal, uuid.UUID(proposal_id))
+        assert proposal.deal_id == deal_id
 
 
 def test_multiple_replies_are_all_processed_in_one_run(db):

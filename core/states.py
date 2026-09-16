@@ -11,8 +11,10 @@ from core.errors import InvalidStateTransition
 from db.enums import (
     ACTION_STATE_TRANSITIONS,
     ALWAYS_REACHABLE_LEAD_STATUSES,
+    DEAL_STAGE_TRANSITIONS,
     LEAD_STATUS_TRANSITIONS,
     ActionState,
+    DealStage,
     LeadStatus,
 )
 
@@ -36,3 +38,12 @@ def can_transition_lead(current: LeadStatus, target: LeadStatus) -> bool:
 def assert_lead_transition(current: LeadStatus, target: LeadStatus) -> None:
     if not can_transition_lead(current, target):
         raise InvalidStateTransition(f"lead status {current} -> {target} is not allowed")
+
+
+def can_transition_deal(current: DealStage, target: DealStage) -> bool:
+    return target in DEAL_STAGE_TRANSITIONS[current]
+
+
+def assert_deal_transition(current: DealStage, target: DealStage) -> None:
+    if not can_transition_deal(current, target):
+        raise InvalidStateTransition(f"deal stage {current} -> {target} is not allowed")

@@ -30,6 +30,10 @@ _EXPECTED_AGENTS = {
     "lead_scoring",
     "outreach",
     "conversation_management",
+    "qualification",
+    "sales",
+    "proposal",
+    "customer",
 }
 
 #: A worker should never leave a task sitting in one of these — every task must either

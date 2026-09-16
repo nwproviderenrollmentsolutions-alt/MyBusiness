@@ -24,6 +24,7 @@ from core import audit, flags, suppression
 from core.task_queue import db_now
 from db.enums import (
     ALWAYS_APPROVAL_ACTIONS,
+    CADENCE_LIMITED_ACTIONS,
     CONTACT_ACTIONS,
     EXTERNAL_ACTIONS,
     WORLD_CHANGING_ACTIONS,
@@ -387,7 +388,10 @@ def _check_send_limits(session: Session, ctx: PolicyContext) -> Decision | None:
                 f"campaign daily send limit reached ({campaign_sent}/{campaign_cap})",
             )
 
-    if ctx.lead_id is not None:
+    # Per-prospect cadence: only for cold, campaign-driven contact. A reply-triggered
+    # send (a proposal following the prospect's own reply) is not the over-contact this
+    # rail protects against, so it is excluded here — see CADENCE_LIMITED_ACTIONS.
+    if ctx.action_type in CADENCE_LIMITED_ACTIONS and ctx.lead_id is not None:
         lead = session.get(Lead, ctx.lead_id)
         if lead is not None:
             if lead.touch_count >= limits.per_prospect_max_touches:

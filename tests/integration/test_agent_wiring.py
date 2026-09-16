@@ -16,6 +16,10 @@ _EXPECTED_AGENTS = {
     "lead_scoring",
     "outreach",
     "conversation_management",
+    "qualification",
+    "sales",
+    "proposal",
+    "customer",
 }
 
 
@@ -30,8 +34,8 @@ def test_all_shipped_agents_load_from_config(db):
 
 
 def test_no_agents_beyond_the_revenue_slice_are_wired_yet():
-    """Qualification, Sales, and Proposal don't exist yet. Wiring one in without
-    building it would be a fake capability."""
+    """Fulfillment, Customer Success, Finance, Marketing, and Analytics don't exist yet.
+    Wiring one in without building it would be a fake capability."""
     from config.settings import get_agents_config
 
     assert set(get_agents_config().agents) == _EXPECTED_AGENTS
@@ -51,3 +55,13 @@ def test_discovery_and_outreach_subscriptions_match_the_events_each_agent_emits(
     # Conversation Management has no subscription — see config/agents.yaml's comment on
     # why (no periodic-polling mechanism exists yet).
     assert agents_config.subscribers_of("outreach.sent") == []
+    assert agents_config.subscribers_of("conversation.reply_received") == ["qualification"]
+    assert agents_config.subscribers_of("deal.qualified") == ["sales"]
+    assert agents_config.subscribers_of("deal.ready_for_proposal") == ["proposal"]
+    assert agents_config.subscribers_of("proposal.reply_received") == ["sales"]
+    assert agents_config.subscribers_of("deal.won") == ["customer"]
+    # Terminal events with no subscriber yet — forward-compatible, not dead code.
+    assert agents_config.subscribers_of("lead.disqualified") == []
+    assert agents_config.subscribers_of("deal.lost") == []
+    assert agents_config.subscribers_of("proposal.sent") == []
+    assert agents_config.subscribers_of("customer.created") == []

@@ -157,6 +157,13 @@ class Message(Base, UUIDPrimaryKeyMixin, TimestampMixin, MockFlagMixin):
     approval_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("approvals.id", ondelete="SET NULL"), default=None
     )
+    #: Set when this outbound message is a proposal send rather than outreach. Lets
+    #: Conversation Management tell a proposal reply apart from an outreach reply and
+    #: route it to Sales (``proposal.reply_received``) instead of Qualification
+    #: (``conversation.reply_received``).
+    proposal_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("proposals.id", ondelete="SET NULL"), default=None, index=True
+    )
 
     scheduled_for: Mapped[datetime | None] = mapped_column(default=None)
     sent_at: Mapped[datetime | None] = mapped_column(default=None)

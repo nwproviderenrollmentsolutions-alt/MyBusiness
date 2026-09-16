@@ -16,6 +16,11 @@ from db.enums import ActionState, CustomerStatus, DealStage
 
 class Deal(Base, UUIDPrimaryKeyMixin, TimestampMixin, MockFlagMixin):
     __tablename__ = "deals"
+    __table_args__ = (
+        # One deal per lead in this thin slice — a lead that goes on to lose isn't
+        # reworked into a second deal yet.
+        UniqueConstraint("lead_id", name="uq_deals_lead"),
+    )
 
     lead_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("leads.id", ondelete="CASCADE"), index=True

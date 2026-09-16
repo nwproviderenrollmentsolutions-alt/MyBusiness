@@ -56,6 +56,11 @@ EXTERNAL_ACTIONS: frozenset[ActionType] = frozenset(
         ActionType.MEETING_SCHEDULE,
         ActionType.PROPOSAL_SEND,
         ActionType.PAYMENT_CHARGE,
+        # Materializes a real business relationship (onboarding, billing implications) —
+        # the global emergency stop must halt it too. Previously only WORLD_CHANGING,
+        # which left it out of the emergency-stop and cost-cap checks (both gated on
+        # EXTERNAL_ACTIONS) even though every other world-changing action is external.
+        ActionType.CUSTOMER_CREATE,
     }
 )
 
@@ -75,13 +80,27 @@ WORLD_CHANGING_ACTIONS: frozenset[ActionType] = frozenset(
     }
 )
 
-#: Actions that contact a person. Always suppression- and rate-limit-checked.
+#: Actions that contact a person. Always suppression- and kill-switch-checked.
 CONTACT_ACTIONS: frozenset[ActionType] = frozenset(
     {
         ActionType.OUTREACH_SEND_EMAIL,
         ActionType.OUTREACH_SEND_FOLLOWUP,
         ActionType.CONVERSATION_REPLY,
         ActionType.PROPOSAL_SEND,
+    }
+)
+
+#: The subset of CONTACT_ACTIONS additionally subject to the per-prospect cadence
+#: limiter (max touches, cooldown). Deliberately narrower than CONTACT_ACTIONS:
+#: PROPOSAL_SEND and CONVERSATION_REPLY are responses to a prospect's own reply, not a
+#: cold re-contact, so the anti-spam cadence limiter — meant to protect someone who
+#: hasn't engaged — does not apply to them. They are still suppression- and
+#: kill-switch-checked like every other CONTACT_ACTIONS entry; only the touch-count and
+#: cooldown rules are narrowed.
+CADENCE_LIMITED_ACTIONS: frozenset[ActionType] = frozenset(
+    {
+        ActionType.OUTREACH_SEND_EMAIL,
+        ActionType.OUTREACH_SEND_FOLLOWUP,
     }
 )
 
@@ -246,6 +265,16 @@ class DealStage(StrEnum):
 OPEN_DEAL_STAGES: frozenset[DealStage] = frozenset(
     {DealStage.QUALIFICATION, DealStage.PROPOSAL, DealStage.NEGOTIATION}
 )
+
+#: NEGOTIATION exists for a future haggling step this milestone doesn't build — a deal
+#: can go straight from PROPOSAL to WON or LOST on the prospect's reply to it.
+DEAL_STAGE_TRANSITIONS: dict[DealStage, frozenset[DealStage]] = {
+    DealStage.QUALIFICATION: frozenset({DealStage.PROPOSAL}),
+    DealStage.PROPOSAL: frozenset({DealStage.NEGOTIATION, DealStage.WON, DealStage.LOST}),
+    DealStage.NEGOTIATION: frozenset({DealStage.WON, DealStage.LOST}),
+    DealStage.WON: frozenset(),
+    DealStage.LOST: frozenset(),
+}
 
 
 class CustomerStatus(StrEnum):

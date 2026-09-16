@@ -61,8 +61,38 @@ agents:
     concurrency: 1
     # No event subscription: there is no periodic-polling mechanism in this system yet,
     # so checking the inbox is a CEO command ("check for replies"), not something that
-    # happens on a schedule.
+    # happens on a schedule. It fires once for outreach replies and again, later, for
+    # proposal replies — the same command, run again once there's something to fetch.
     subscribes_to: []
 
-# Qualification, Sales, and Proposal don't exist yet. A CEO command needing one of them
-# reports BLOCKED honestly rather than pretending to dispatch.
+  qualification:
+    module: agents.qualification.agent
+    enabled: true
+    concurrency: 2
+    subscribes_to:
+      - conversation.reply_received
+
+  sales:
+    module: agents.sales.agent
+    enabled: true
+    concurrency: 2
+    subscribes_to:
+      - deal.qualified
+      - proposal.reply_received
+
+  proposal:
+    module: agents.proposal.agent
+    enabled: true
+    concurrency: 2
+    subscribes_to:
+      - deal.ready_for_proposal
+
+  customer:
+    module: agents.customer.agent
+    enabled: true
+    concurrency: 1
+    subscribes_to:
+      - deal.won
+
+# Fulfillment, Customer Success, Finance, Marketing, and Analytics don't exist yet. A CEO
+# command needing one of them reports BLOCKED honestly rather than pretending to dispatch.

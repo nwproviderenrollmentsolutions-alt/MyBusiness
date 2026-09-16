@@ -57,7 +57,8 @@ def test_every_provider_defaults_to_mock():
 
 
 def test_only_the_revenue_slice_agents_are_wired_so_far():
-    """No Qualification, Sales, or Proposal agent yet; claiming one exists would be fake."""
+    """No Fulfillment, Customer Success, Finance, Marketing, or Analytics agent yet;
+    claiming one exists would be fake."""
     assert set(get_agents_config().agents) == {
         "chief_of_staff",
         "opportunity_discovery",
@@ -66,4 +67,15 @@ def test_only_the_revenue_slice_agents_are_wired_so_far():
         "lead_scoring",
         "outreach",
         "conversation_management",
+        "qualification",
+        "sales",
+        "proposal",
+        "customer",
     }
+
+
+def test_shipped_policy_requires_approval_for_customer_create():
+    """Money-adjacent and always guilty until proven innocent, same as every contact
+    action — see test_shipped_policy_requires_approval_for_every_contact_action."""
+    autonomy = get_policy_config().autonomy_for(ActionType.CUSTOMER_CREATE)
+    assert autonomy is AutonomyMode.APPROVAL_REQUIRED

@@ -195,7 +195,9 @@ unique index makes task creation idempotent — the same event cannot spawn dupl
 **Events.** Written to `outbox_events` in the *same transaction* as the state change that
 caused them, then dispatched by the worker to subscribers declared in `config/agents.yaml`.
 Dispatch creates new tasks. An emitting agent never knows who consumes its events, which is
-precisely how a later Fulfillment agent subscribes to `deal.won` without touching Sales.
+precisely how Customer subscribes to `deal.won` without Sales — the agent that emits it —
+knowing Customer exists, and how a future Fulfillment agent will subscribe to
+`customer.created` the same way, without touching Customer.
 
 A subscriber's task is created with `task_input = event.payload` directly — no envelope.
 An agent's declared input schema is therefore the same whether the task arrived from a CEO
@@ -382,6 +384,13 @@ reproducible, and every record they produce is flagged `is_mock`.
   `alembic upgrade head`. **Lesson institutionalized**: adding a value to any enum backing
   a `state_column` needs a hand-written migration to alter that CHECK constraint — nothing
   in the toolchain generates it automatically, and this test is what would catch a repeat.
+- **Operational note from Milestone 5's live-DB verification**: `Base.metadata.drop_all()`
+  followed by `alembic upgrade head` does *not* replay the migration chain — Alembic's own
+  `alembic_version` table survives `drop_all()` (it isn't part of `Base.metadata`), so
+  Alembic sees the stamped head revision, concludes there is nothing to do, and leaves
+  every real table missing. Rebuilding a dev database from scratch the production way
+  needs `DROP SCHEMA public CASCADE; CREATE SCHEMA public;` (or `alembic downgrade base`
+  run *before* anything drops tables out from under it), not `drop_all()`.
 
 ## 15. Milestones
 
@@ -391,7 +400,7 @@ reproducible, and every record they produce is flagged `is_mock`.
 | ~~2~~ | ~~**Agent runtime + Chief of Staff**~~ | **Done.** Chief of Staff interprets CEO commands (deterministic pattern matching, not an LLM — see agents/chief_of_staff/interpreter.py), answers status/decision queries from the database, executes kill-switch and campaign-control commands directly, and dispatches to a domain agent when one is registered — checked against the live registry, so a command needing an agent that doesn't exist yet is reported BLOCKED rather than faked. `cli/ceo.py` is the CEO's working interface until the Milestone 6 dashboard exists. 176 tests + ruff + mypy green |
 | ~~3~~ | ~~**Discovery chain**~~ | **Done.** Opportunity Discovery → Lead Discovery → Enrichment → Scoring, wired entirely through `config/agents.yaml` subscriptions (`opportunity.discovered` → `lead.discovered` → `lead.enriched`) — no agent calls another directly, proven by a test that drives the whole chain from one CEO command via `AGENTS.load_from_config()`. Scoring is a deterministic rule-based rubric, not an LLM call, and disqualifies leads below threshold rather than passing every lead downstream. Research prompts wrap external content as explicit untrusted data. Found and fixed a real migration-drift bug in the process (see §14, "Migration drift"). 226 tests + ruff + mypy green |
 | ~~4~~ | ~~**Outreach chain**~~ | **Done.** Outreach drafts an LLM-written email for every `lead.scored` lead (never `lead.disqualified`) and always requires approval — hand-drafted copy is never a CEO-approved template, so `template_approved=False` forces the require-approval tier regardless of the autonomy setting. Resuming after approval re-authorizes at the moment of execution (`policy.evaluate_after_approval`) rather than trusting the original decision forever: a suppression or kill switch engaged between approval and send still blocks it, proven by dedicated tests. Conversation Management matches inbound replies to the outbound message they answer via `provider_message_id` and advances the lead to `engaged`; it runs on the CEO's "check for replies" command rather than a subscription, since no periodic-polling mechanism exists yet. Found and fixed two real bugs: a self-collision where the duplicate-check ran after the row it was checking already existed (same bug class `evaluate_after_approval` was built to prevent, reintroduced in Outreach's own draft path), and a dry-run propagation gap where every event-triggered task fell back to the *global* dry-run default because `OutboxEvent` carried no memory of the task that emitted it. 265 tests + ruff + mypy green |
-| 5 | Close chain | Qualification → Sales → Proposal → approval → Customer |
+| ~~5~~ | ~~**Close chain**~~ | **Done.** Qualification classifies a lead's reply (deterministic keyword rules, see core/reply_signals.py — not an LLM, for the same reproducibility reason as Lead Scoring, and because the mock LLM's fixed marker output has nothing in it to classify) and creates the lead's one deal (`uq_deals_lead`) on a positive signal. Sales values the deal (deterministic rubric, agents/sales/valuation.py) and advances it to `proposal`, then later closes it `won`/`lost` from the same rule-based classification applied to the reply a sent proposal gets. Proposal drafts and sends a priced proposal exactly the way Outreach does — approval-required, hand-drafted copy, re-authorized at send time — reusing the lead's existing conversation so Conversation Management's "check for replies" already knows how to route a reply to it. Customer requests approval and, once granted, creates the customer record; unlike Message/Proposal it has no ActionState of its own — there's nothing to create before approval, so the approval payload alone carries what the post-approval step needs. Two real issues found and fixed while building this: (1) `CUSTOMER_CREATE` was `WORLD_CHANGING` but not `EXTERNAL`, which meant the global emergency stop — and the daily cost cap — did not cover it, unlike every other world-changing action; (2) the per-prospect touch/cooldown limiter applied to `PROPOSAL_SEND` as if it were cold outreach, which would have blocked a proposal sent in direct response to the prospect's own reply — narrowed to `CADENCE_LIMITED_ACTIONS` (cold cadence only), while suppression and kill-switch checks still cover every contact action. 314 tests + ruff + mypy green |
 | 6 | CEO surface | Dashboard metrics, approval queue, CEO command interface, kill switches |
 | 7 | Simulated end-to-end test | Full slice green on mocks, nothing real sent |
 | 8 | Real providers | Swap mocks one at a time behind the same interfaces |

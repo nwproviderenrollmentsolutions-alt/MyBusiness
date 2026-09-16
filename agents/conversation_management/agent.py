@@ -1,4 +1,4 @@
-"""Conversation Management: processes inbound replies to outreach.
+"""Conversation Management: processes inbound replies to outreach and to proposals.
 
 Triggered by the CEO's "check for replies" command rather than an event subscription —
 there is no periodic-polling mechanism in this system yet, so checking the inbox is
@@ -9,6 +9,11 @@ with the same input, unchanged.
 Fetches every reply each run (no ``since`` cursor is persisted anywhere yet) and relies on
 idempotent message creation to skip replies already processed — less efficient than a
 cursor, but simple and correct, which matters more at this stage.
+
+A reply is routed by which outbound message it answers: a reply to an outreach message
+emits ``conversation.reply_received`` (Qualification's trigger); a reply to a proposal
+message (tagged with ``proposal_id``) emits ``proposal.reply_received`` (Sales' trigger
+for closing the deal) instead.
 """
 
 from __future__ import annotations
@@ -27,9 +32,11 @@ from core.agent_base import (
     AgentOutput,
     EventRequest,
 )
+from core.errors import PermanentError
 from core.states import assert_lead_transition, can_transition_lead
 from db.enums import ActionState, Channel, ConversationStatus, LeadStatus, MessageDirection
 from db.models.pipeline import Conversation, Lead, Message
+from db.models.revenue import Proposal
 from providers.base import InboundMessage
 
 
@@ -124,6 +131,33 @@ class ConversationManagementAgent(Agent):
             lead.status = LeadStatus.ENGAGED
 
         session.flush()
+
+        if original.proposal_id is not None:
+            # A reply to a proposal send, not to outreach — route to Sales to close the
+            # deal rather than to Qualification, which would find the lead already past
+            # `engaged` and no-op it anyway. Distinguishing on the *replied-to* message's
+            # own proposal_id (not on lead status) keeps this correct even if a lead
+            # somehow has both an open conversation and an open proposal at once.
+            proposal = session.get(Proposal, original.proposal_id)
+            if proposal is None:
+                # Proposals are never deleted in this system, so a dangling proposal_id
+                # means a real invariant broke, not a normal "no match" case.
+                raise PermanentError(f"proposal {original.proposal_id} does not exist")
+            return _Outcome(
+                "processed",
+                event=EventRequest(
+                    event_type="proposal.reply_received",
+                    subject_type="conversation",
+                    subject_id=conversation.id,
+                    payload={
+                        "deal_id": str(proposal.deal_id),
+                        "proposal_id": str(proposal.id),
+                        "lead_id": str(original.lead_id),
+                        "message_id": str(reply.id),
+                    },
+                ),
+            )
+
         return _Outcome(
             "processed",
             event=EventRequest(

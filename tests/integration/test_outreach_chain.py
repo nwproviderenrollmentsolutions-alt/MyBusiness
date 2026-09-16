@@ -101,8 +101,13 @@ def test_approve_drives_the_send_and_a_reply_engages_the_lead(db):
         reply_command = session.get(CeoCommand, reply_command_id)
         assert reply_command.status is CommandStatus.DISPATCHED
 
+        # Now that Milestone 5 is wired, `conversation.reply_received` doesn't stop at
+        # `engaged` — Qualification (subscribed via config/agents.yaml) reads this same
+        # positive reply and advances the lead again, all within the same drain. The
+        # close chain itself (deal creation onward) is test_close_chain.py's concern;
+        # this test only needs to prove the reply-handling boundary still works.
         lead = session.get(Lead, lead_id)
-        assert lead.status is LeadStatus.ENGAGED
+        assert lead.status is LeadStatus.QUALIFIED
 
         conversation = session.scalar(select(Conversation).where(Conversation.lead_id == lead_id))
         assert conversation.status is ConversationStatus.ENGAGED
