@@ -27,6 +27,7 @@ _REQUIRED_AGENT: dict[CommandIntent, str] = {
     CommandIntent.FIND_OPPORTUNITIES: "opportunity_discovery",
     CommandIntent.FIND_LEADS: "lead_discovery",
     CommandIntent.START_CAMPAIGN: "outreach",
+    CommandIntent.CHECK_REPLIES: "conversation_management",
 }
 
 
@@ -86,6 +87,7 @@ class ChiefOfStaffAgent(Agent):
                 CommandIntent.FIND_OPPORTUNITIES
                 | CommandIntent.FIND_LEADS
                 | CommandIntent.START_CAMPAIGN
+                | CommandIntent.CHECK_REPLIES
             ):
                 follow_up = self._dispatch_or_block(command, parsed.intent)
 

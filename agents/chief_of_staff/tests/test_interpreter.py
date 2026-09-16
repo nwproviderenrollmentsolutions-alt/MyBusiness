@@ -40,6 +40,9 @@ from db.enums import CommandIntent
         ("Engage the kill switch", CommandIntent.ENGAGE_KILL_SWITCH, {}),
         ("Stop everything right now", CommandIntent.ENGAGE_KILL_SWITCH, {}),
         ("Release the kill switch", CommandIntent.RELEASE_KILL_SWITCH, {}),
+        ("check for replies", CommandIntent.CHECK_REPLIES, {}),
+        ("Any new replies?", CommandIntent.CHECK_REPLIES, {}),
+        ("check the inbox", CommandIntent.CHECK_REPLIES, {}),
         ("asdkjfh nonsense gibberish", CommandIntent.UNKNOWN, {}),
     ],
 )

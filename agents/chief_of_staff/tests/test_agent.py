@@ -12,9 +12,10 @@ from db.models.pipeline import Campaign
 
 pytestmark = pytest.mark.integration
 
-# The "unbuilt agent" tests below rely on the global agent registry being empty of
-# domain agents (the autouse clean_registries fixture in conftest.py guarantees this),
-# so FIND_OPPORTUNITIES / FIND_LEADS / START_CAMPAIGN commands land on BLOCKED.
+# The "unbuilt agent" tests below rely on the global agent registry being empty (the
+# autouse clean_registries fixture in conftest.py guarantees this) — these agents are
+# real code by now, but nothing in this test file calls AGENTS.register() or
+# load_from_config(), so the dispatch-or-block path still sees them as unregistered.
 
 
 def _command(db, text: str, created_by: str = "ceo@example.com") -> CeoCommand:
@@ -151,6 +152,7 @@ def test_campaign_names_are_matched_case_insensitively(db):
         ("find our best market opportunity", "opportunity_discovery"),
         ("find 50 qualified plumbing leads", "lead_discovery"),
         ("start a campaign for the new offer", "outreach"),
+        ("check for replies", "conversation_management"),
     ],
 )
 def test_commands_needing_unbuilt_agents_are_blocked_not_faked(db, text, expected_agent):

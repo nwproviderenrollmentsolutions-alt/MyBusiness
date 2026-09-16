@@ -284,6 +284,7 @@ class CommandIntent(StrEnum):
     KILL_CAMPAIGN = "kill_campaign"
     SHOW_DECISIONS = "show_decisions"
     SHOW_STATUS = "show_status"
+    CHECK_REPLIES = "check_replies"
     ENGAGE_KILL_SWITCH = "engage_kill_switch"
     RELEASE_KILL_SWITCH = "release_kill_switch"
     UNKNOWN = "unknown"

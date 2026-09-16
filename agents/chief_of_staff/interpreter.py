@@ -36,6 +36,7 @@ _HELP_TEXT = (
     '  "find <N> qualified <segment> prospects"\n'
     '  "start a campaign for <offer>"\n'
     '  "pause / resume / kill campaign <name>"\n'
+    '  "check for replies"\n'
     '  "show today\'s decisions"\n'
     '  "show status"\n'
     '  "engage / release the kill switch"'
@@ -127,6 +128,11 @@ _PATTERNS: list[_Rule] = [
     (
         re.compile(r"\bfind\b.*\bopportunit(?:y|ies)\b", re.I),
         CommandIntent.FIND_OPPORTUNITIES,
+        _no_params,
+    ),
+    (
+        re.compile(r"\b(check|any|new)\b.*\b(repl(?:y|ies)|inbox)\b", re.I),
+        CommandIntent.CHECK_REPLIES,
         _no_params,
     ),
     (
