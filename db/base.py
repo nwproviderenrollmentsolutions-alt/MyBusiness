@@ -46,9 +46,23 @@ def state_column(enum_cls: type[StrEnum], **kwargs: Any) -> Any:
     Native enums require ALTER TYPE to add a value, which is awkward in a system whose
     state machines are expected to grow. The CHECK constraint gives the same database-level
     guarantee and is trivial to migrate.
+
+    ``create_constraint`` is explicit because SQLAlchemy 2.0 defaults it to False — without
+    it the column would accept any string, and an invalid state here could mean an
+    unapproved message counted as approved. ``values_callable`` stores the enum's value
+    ("pending_approval") rather than its name ("PENDING_APPROVAL"), so raw SQL and
+    dashboards read the same vocabulary the code does.
     """
     return mapped_column(
-        SAEnum(enum_cls, native_enum=False, length=32, validate_strings=True), **kwargs
+        SAEnum(
+            enum_cls,
+            native_enum=False,
+            length=32,
+            validate_strings=True,
+            create_constraint=True,
+            values_callable=lambda cls: [member.value for member in cls],
+        ),
+        **kwargs,
     )
 
 

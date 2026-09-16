@@ -27,14 +27,14 @@ from types import FrameType
 from sqlalchemy.orm import Session
 
 from config.settings import get_settings
-from core import approval_gate, audit, event_bus, task_queue
+from core import approval_gate, event_bus, task_queue
 from core.agent_base import Agent, AgentContext, AgentOutput
 from core.errors import AgentError, PermanentError, RetryableError
 from core.observability import configure_logging, get_logger
 from core.registry import AGENTS
 from core.tool_registry import TOOLS, ToolBelt
 from core.tools import register_builtin_tools
-from db.enums import RunStatus, TaskStatus
+from db.enums import RunStatus
 from db.models.runtime import AgentRun, AgentTask
 from db.session import session_scope
 
@@ -194,19 +194,11 @@ def _finalize_run_failure(run_id: uuid.UUID, task_id: uuid.UUID, exc: BaseExcept
             run.error = error.model_dump()
             run.finished_at = task_queue.db_now(session)
         if task is not None:
-            status = task_queue.fail(
+            # Escalation of terminal failures is handled inside task_queue.fail, which is
+            # the one funnel every failure route passes through.
+            task_queue.fail(
                 session, task, error=f"{error.type}: {error.message}", retryable=error.retryable
             )
-            if status is TaskStatus.DEAD_LETTER:
-                audit.record_system(
-                    session,
-                    action="task.escalated",
-                    subject_type="agent_task",
-                    subject_id=task.id,
-                    reason="retries exhausted; needs CEO attention",
-                    task_id=task.id,
-                    correlation_id=task.correlation_id,
-                )
 
 
 def execute_task(task_id: uuid.UUID, *, worker_id: str) -> RunStatus:

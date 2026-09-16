@@ -230,7 +230,32 @@ def fail(
         task_id=task.id,
         correlation_id=task.correlation_id,
     )
+    _escalate_if_terminal(session, task)
     return task.status
+
+
+def _escalate_if_terminal(session: Session, task: AgentTask) -> None:
+    """Surface a task that has stopped making progress.
+
+    Lives here rather than in the worker because failures arrive by several routes — an
+    agent reporting failure, a crash, a lease that expired — and a failure nobody surfaces
+    is work silently not happening.
+    """
+    if task.status is TaskStatus.DEAD_LETTER:
+        reason = "retries exhausted; needs CEO attention"
+    elif task.status is TaskStatus.FAILED:
+        reason = "permanent failure; needs CEO attention"
+    else:
+        return
+    audit.record_system(
+        session,
+        action="task.escalated",
+        subject_type="agent_task",
+        subject_id=task.id,
+        reason=reason,
+        task_id=task.id,
+        correlation_id=task.correlation_id,
+    )
 
 
 def pause_for_approval(session: Session, task: AgentTask, *, approval_id: uuid.UUID) -> None:
@@ -334,4 +359,5 @@ def reclaim_expired_leases(session: Session, *, limit: int = 50) -> list[AgentTa
             task_id=task.id,
             correlation_id=task.correlation_id,
         )
+        _escalate_if_terminal(session, task)
     return reclaimed

@@ -1,8 +1,8 @@
 """initial schema
 
-Revision ID: 8e22a47f379d
+Revision ID: 374291fd0fdf
 Revises: 
-Create Date: 2026-09-16 04:53:58.990643
+Create Date: 2026-09-16 05:15:42.345996
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '8e22a47f379d'
+revision: str = '374291fd0fdf'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,7 +26,7 @@ def upgrade() -> None:
     sa.Column('action_type', sa.String(length=80), nullable=True),
     sa.Column('input', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('result', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('status', sa.Enum('PENDING', 'LEASED', 'RUNNING', 'AWAITING_APPROVAL', 'SUCCEEDED', 'FAILED', 'CANCELLED', 'DEAD_LETTER', name='taskstatus', native_enum=False, length=32), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'leased', 'running', 'awaiting_approval', 'succeeded', 'failed', 'cancelled', 'dead_letter', name='taskstatus', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('priority', sa.Integer(), nullable=False),
     sa.Column('attempts', sa.Integer(), nullable=False),
     sa.Column('max_attempts', sa.Integer(), nullable=False),
@@ -37,7 +37,7 @@ def upgrade() -> None:
     sa.Column('parent_task_id', sa.UUID(), nullable=True),
     sa.Column('correlation_id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('dry_run', sa.Boolean(), nullable=False),
-    sa.Column('created_by_actor_type', sa.Enum('AGENT', 'HUMAN', 'SYSTEM', name='actortype', native_enum=False, length=32), nullable=False),
+    sa.Column('created_by_actor_type', sa.Enum('agent', 'human', 'system', name='actortype', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('created_by_actor', sa.String(length=120), nullable=False),
     sa.Column('started_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('finished_at', sa.DateTime(timezone=True), nullable=True),
@@ -56,7 +56,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_agent_tasks_parent_task_id'), 'agent_tasks', ['parent_task_id'], unique=False)
     op.create_index(op.f('ix_agent_tasks_status'), 'agent_tasks', ['status'], unique=False)
     op.create_table('audit_logs',
-    sa.Column('actor_type', sa.Enum('AGENT', 'HUMAN', 'SYSTEM', name='actortype', native_enum=False, length=32), nullable=False),
+    sa.Column('actor_type', sa.Enum('agent', 'human', 'system', name='actortype', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('actor', sa.String(length=120), nullable=False),
     sa.Column('action', sa.String(length=120), nullable=False),
     sa.Column('subject_type', sa.String(length=60), nullable=True),
@@ -99,7 +99,7 @@ def upgrade() -> None:
     sa.Column('offer', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('estimated_value_usd', sa.Numeric(precision=14, scale=2), nullable=True),
     sa.Column('confidence', sa.Float(), nullable=True),
-    sa.Column('status', sa.Enum('PROPOSED', 'VALIDATING', 'APPROVED', 'ACTIVE', 'SHELVED', name='opportunitystatus', native_enum=False, length=32), nullable=False),
+    sa.Column('status', sa.Enum('proposed', 'validating', 'approved', 'active', 'shelved', name='opportunitystatus', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('source', sa.String(length=80), nullable=False),
     sa.Column('discovered_by_agent', sa.String(length=80), nullable=True),
     sa.Column('evidence', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
@@ -132,7 +132,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_outbox_events_event_type'), 'outbox_events', ['event_type'], unique=False)
     op.create_index('ix_outbox_events_unprocessed', 'outbox_events', ['created_at'], unique=False, postgresql_where=sa.text('processed_at IS NULL'))
     op.create_table('suppressions',
-    sa.Column('scope', sa.Enum('EMAIL', 'DOMAIN', 'PHONE', name='suppressionscope', native_enum=False, length=32), nullable=False),
+    sa.Column('scope', sa.Enum('email', 'domain', 'phone', name='suppressionscope', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('value', sa.String(length=320), nullable=False),
     sa.Column('reason', sa.Text(), nullable=False),
     sa.Column('source', sa.String(length=80), nullable=False),
@@ -157,7 +157,7 @@ def upgrade() -> None:
     sa.Column('task_id', sa.UUID(), nullable=False),
     sa.Column('agent', sa.String(length=80), nullable=False),
     sa.Column('agent_version', sa.String(length=40), nullable=False),
-    sa.Column('status', sa.Enum('RUNNING', 'SUCCEEDED', 'FAILED', 'TIMED_OUT', 'NEEDS_APPROVAL', name='runstatus', native_enum=False, length=32), nullable=False),
+    sa.Column('status', sa.Enum('running', 'succeeded', 'failed', 'timed_out', 'needs_approval', name='runstatus', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('attempt', sa.Integer(), nullable=False),
     sa.Column('started_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('finished_at', sa.DateTime(timezone=True), nullable=True),
@@ -182,8 +182,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_agent_runs_task_id'), 'agent_runs', ['task_id'], unique=False)
     op.create_table('approvals',
     sa.Column('action_type', sa.String(length=80), nullable=False),
-    sa.Column('status', sa.Enum('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED', name='approvalstatus', native_enum=False, length=32), nullable=False),
-    sa.Column('risk', sa.Enum('LOW', 'MEDIUM', 'HIGH', 'CRITICAL', name='risklevel', native_enum=False, length=32), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'approved', 'rejected', 'expired', name='approvalstatus', native_enum=False, create_constraint=True, length=32), nullable=False),
+    sa.Column('risk', sa.Enum('low', 'medium', 'high', 'critical', name='risklevel', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('summary', sa.Text(), nullable=False),
     sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('edited_payload', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -212,8 +212,8 @@ def upgrade() -> None:
     op.create_table('campaigns',
     sa.Column('name', sa.String(length=160), nullable=False),
     sa.Column('opportunity_id', sa.UUID(), nullable=True),
-    sa.Column('channel', sa.Enum('EMAIL', 'LINKEDIN', 'PHONE', 'SMS', name='channel', native_enum=False, length=32), nullable=False),
-    sa.Column('status', sa.Enum('DRAFT', 'ACTIVE', 'PAUSED', 'KILLED', 'COMPLETED', name='campaignstatus', native_enum=False, length=32), nullable=False),
+    sa.Column('channel', sa.Enum('email', 'linkedin', 'phone', 'sms', name='channel', native_enum=False, create_constraint=True, length=32), nullable=False),
+    sa.Column('status', sa.Enum('draft', 'active', 'paused', 'killed', 'completed', name='campaignstatus', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('daily_send_limit', sa.Integer(), nullable=False),
     sa.Column('offer', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('templates', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
@@ -278,7 +278,7 @@ def upgrade() -> None:
     sa.Column('company_id', sa.UUID(), nullable=False),
     sa.Column('opportunity_id', sa.UUID(), nullable=True),
     sa.Column('campaign_id', sa.UUID(), nullable=True),
-    sa.Column('status', sa.Enum('DISCOVERED', 'ENRICHED', 'SCORED', 'CONTACTED', 'ENGAGED', 'QUALIFIED', 'DISQUALIFIED', 'DO_NOT_CONTACT', name='leadstatus', native_enum=False, length=32), nullable=False),
+    sa.Column('status', sa.Enum('discovered', 'enriched', 'scored', 'contacted', 'engaged', 'qualified', 'disqualified', 'do_not_contact', name='leadstatus', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('current_score', sa.Integer(), nullable=True),
     sa.Column('status_reason', sa.Text(), nullable=True),
     sa.Column('touch_count', sa.Integer(), nullable=False),
@@ -305,8 +305,8 @@ def upgrade() -> None:
     op.create_table('conversations',
     sa.Column('lead_id', sa.UUID(), nullable=False),
     sa.Column('campaign_id', sa.UUID(), nullable=True),
-    sa.Column('channel', sa.Enum('EMAIL', 'LINKEDIN', 'PHONE', 'SMS', name='channel', native_enum=False, length=32), nullable=False),
-    sa.Column('status', sa.Enum('OPEN', 'AWAITING_REPLY', 'ENGAGED', 'QUALIFIED', 'DISQUALIFIED', 'CLOSED', name='conversationstatus', native_enum=False, length=32), nullable=False),
+    sa.Column('channel', sa.Enum('email', 'linkedin', 'phone', 'sms', name='channel', native_enum=False, create_constraint=True, length=32), nullable=False),
+    sa.Column('status', sa.Enum('open', 'awaiting_reply', 'engaged', 'qualified', 'disqualified', 'closed', name='conversationstatus', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('subject', sa.String(length=300), nullable=True),
     sa.Column('last_inbound_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('last_outbound_at', sa.DateTime(timezone=True), nullable=True),
@@ -325,7 +325,7 @@ def upgrade() -> None:
     op.create_table('deals',
     sa.Column('lead_id', sa.UUID(), nullable=False),
     sa.Column('opportunity_id', sa.UUID(), nullable=True),
-    sa.Column('stage', sa.Enum('QUALIFICATION', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST', name='dealstage', native_enum=False, length=32), nullable=False),
+    sa.Column('stage', sa.Enum('qualification', 'proposal', 'negotiation', 'won', 'lost', name='dealstage', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('value_usd', sa.Numeric(precision=14, scale=2), nullable=False),
     sa.Column('currency', sa.String(length=3), nullable=False),
     sa.Column('probability', sa.Integer(), nullable=False),
@@ -365,7 +365,7 @@ def upgrade() -> None:
     op.create_table('customers',
     sa.Column('company_id', sa.UUID(), nullable=False),
     sa.Column('deal_id', sa.UUID(), nullable=True),
-    sa.Column('status', sa.Enum('ONBOARDING', 'ACTIVE', 'CHURNED', name='customerstatus', native_enum=False, length=32), nullable=False),
+    sa.Column('status', sa.Enum('onboarding', 'active', 'churned', name='customerstatus', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('plan', sa.String(length=120), nullable=True),
     sa.Column('mrr_usd', sa.Numeric(precision=14, scale=2), nullable=False),
     sa.Column('contract_value_usd', sa.Numeric(precision=14, scale=2), nullable=False),
@@ -387,9 +387,9 @@ def upgrade() -> None:
     op.create_table('messages',
     sa.Column('conversation_id', sa.UUID(), nullable=False),
     sa.Column('lead_id', sa.UUID(), nullable=False),
-    sa.Column('direction', sa.Enum('INBOUND', 'OUTBOUND', name='messagedirection', native_enum=False, length=32), nullable=False),
-    sa.Column('channel', sa.Enum('EMAIL', 'LINKEDIN', 'PHONE', 'SMS', name='channel', native_enum=False, length=32), nullable=False),
-    sa.Column('state', sa.Enum('DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'COMPLETED', 'FAILED', 'REJECTED', 'SUPPRESSED', name='actionstate', native_enum=False, length=32), nullable=False),
+    sa.Column('direction', sa.Enum('inbound', 'outbound', name='messagedirection', native_enum=False, create_constraint=True, length=32), nullable=False),
+    sa.Column('channel', sa.Enum('email', 'linkedin', 'phone', 'sms', name='channel', native_enum=False, create_constraint=True, length=32), nullable=False),
+    sa.Column('state', sa.Enum('draft', 'pending_approval', 'approved', 'executing', 'completed', 'failed', 'rejected', 'suppressed', name='actionstate', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('subject', sa.String(length=300), nullable=True),
     sa.Column('body', sa.Text(), nullable=False),
     sa.Column('template_id', sa.String(length=120), nullable=True),
@@ -419,7 +419,7 @@ def upgrade() -> None:
     op.create_table('proposals',
     sa.Column('deal_id', sa.UUID(), nullable=False),
     sa.Column('version', sa.Integer(), nullable=False),
-    sa.Column('state', sa.Enum('DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'COMPLETED', 'FAILED', 'REJECTED', 'SUPPRESSED', name='actionstate', native_enum=False, length=32), nullable=False),
+    sa.Column('state', sa.Enum('draft', 'pending_approval', 'approved', 'executing', 'completed', 'failed', 'rejected', 'suppressed', name='actionstate', native_enum=False, create_constraint=True, length=32), nullable=False),
     sa.Column('title', sa.String(length=300), nullable=False),
     sa.Column('content', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('total_value_usd', sa.Numeric(precision=14, scale=2), nullable=False),
