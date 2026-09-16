@@ -48,6 +48,21 @@ agents:
     subscribes_to:
       - lead.enriched
 
-# Outreach, Conversation Management, Qualification, Sales, and Proposal don't exist yet.
-# A CEO command needing one of them (e.g. "start a campaign for ...") reports BLOCKED
-# honestly rather than pretending to dispatch.
+  outreach:
+    module: agents.outreach.agent
+    enabled: true
+    concurrency: 2
+    subscribes_to:
+      - lead.scored
+
+  conversation_management:
+    module: agents.conversation_management.agent
+    enabled: true
+    concurrency: 1
+    # No event subscription: there is no periodic-polling mechanism in this system yet,
+    # so checking the inbox is a CEO command ("check for replies"), not something that
+    # happens on a schedule.
+    subscribes_to: []
+
+# Qualification, Sales, and Proposal don't exist yet. A CEO command needing one of them
+# reports BLOCKED honestly rather than pretending to dispatch.

@@ -35,7 +35,13 @@ def emit(
     emitted_by: str = "system",
     task_id: uuid.UUID | None = None,
     correlation_id: uuid.UUID | None = None,
+    dry_run: bool = True,
 ) -> OutboxEvent:
+    """``dry_run`` should be the emitting task's own flag whenever there is one — the
+    worker (``worker.runner``) and ``approval_gate`` both pass it through automatically.
+    The default of ``True`` only applies to the rare event with no originating task (a
+    direct CEO/system action); it is the safe direction to fail toward.
+    """
     event = OutboxEvent(
         event_type=event_type,
         payload=payload or {},
@@ -44,6 +50,7 @@ def emit(
         emitted_by=emitted_by,
         task_id=task_id,
         correlation_id=correlation_id,
+        dry_run=dry_run,
     )
     session.add(event)
     session.flush()
@@ -83,6 +90,7 @@ def dispatch_pending(session: Session, *, limit: int = 50) -> int:
                 dedupe_key=f"event:{event.id}:{agent_name}",
                 correlation_id=event.correlation_id,
                 parent_task_id=event.task_id,
+                dry_run=event.dry_run,
                 created_by_actor_type=ActorType.SYSTEM,
                 created_by_actor="event_bus",
             )

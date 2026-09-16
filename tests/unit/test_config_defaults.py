@@ -57,11 +57,13 @@ def test_every_provider_defaults_to_mock():
 
 
 def test_only_the_revenue_slice_agents_are_wired_so_far():
-    """No Outreach, Sales, or Proposal agent yet; claiming one exists would be fake."""
+    """No Qualification, Sales, or Proposal agent yet; claiming one exists would be fake."""
     assert set(get_agents_config().agents) == {
         "chief_of_staff",
         "opportunity_discovery",
         "lead_discovery",
         "lead_enrichment",
         "lead_scoring",
+        "outreach",
+        "conversation_management",
     }

@@ -14,6 +14,8 @@ _EXPECTED_AGENTS = {
     "lead_discovery",
     "lead_enrichment",
     "lead_scoring",
+    "outreach",
+    "conversation_management",
 }
 
 
@@ -28,14 +30,14 @@ def test_all_shipped_agents_load_from_config(db):
 
 
 def test_no_agents_beyond_the_revenue_slice_are_wired_yet():
-    """Outreach, Conversation Management, Qualification, Sales, Proposal don't exist yet.
-    Wiring one in without building it would be a fake capability."""
+    """Qualification, Sales, and Proposal don't exist yet. Wiring one in without
+    building it would be a fake capability."""
     from config.settings import get_agents_config
 
     assert set(get_agents_config().agents) == _EXPECTED_AGENTS
 
 
-def test_discovery_chain_subscriptions_match_the_events_each_agent_emits():
+def test_discovery_and_outreach_subscriptions_match_the_events_each_agent_emits():
     """The event/payload contract (ARCHITECTURE.md): a subscriber's declared input schema
     must match what the emitting agent puts in the event payload — spot-check the wiring
     that makes the chain actually connect end to end."""
@@ -45,3 +47,7 @@ def test_discovery_chain_subscriptions_match_the_events_each_agent_emits():
     assert agents_config.subscribers_of("opportunity.discovered") == ["lead_discovery"]
     assert agents_config.subscribers_of("lead.discovered") == ["lead_enrichment"]
     assert agents_config.subscribers_of("lead.enriched") == ["lead_scoring"]
+    assert agents_config.subscribers_of("lead.scored") == ["outreach"]
+    # Conversation Management has no subscription — see config/agents.yaml's comment on
+    # why (no periodic-polling mechanism exists yet).
+    assert agents_config.subscribers_of("outreach.sent") == []

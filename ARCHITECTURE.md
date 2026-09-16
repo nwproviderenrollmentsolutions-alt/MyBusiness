@@ -208,6 +208,17 @@ Lineage back to the triggering event is not lost — the task's `dedupe_key` enc
 event id (`event:<id>:<agent>`) and `correlation_id` ties the whole chain together in the
 audit log.
 
+`outbox_events.dry_run` carries the emitting task's dry-run flag forward to whatever task
+the event spawns. This was missing through Milestone 3 — every event-triggered task fell
+back to the *global* dry-run default instead of the chain it was actually part of, so a
+CEO command explicitly submitted with `dry_run=False` could still have its automatic
+downstream work (discovery → enrichment → scoring → outreach, none of it a direct
+follow-up task) silently revert to simulating once it crossed an event boundary. Found
+while building Milestone 4's end-to-end Outreach test: a command run live produced a
+message that only ever reached `SIMULATE`. Fixed by giving `OutboxEvent` its own
+`dry_run` column, set from the emitting task (`worker.runner`, `approval_gate`) and
+propagated into every task `dispatch_pending` creates.
+
 **Idempotency.** Three layers: `dedupe_key` on tasks, `idempotency_key` on outbound messages
 (unique), and provider-level keys passed to external APIs so a retry after a timeout cannot
 double-send.
@@ -379,7 +390,7 @@ reproducible, and every record they produce is flagged `is_mock`.
 | ~~1~~ | ~~**Core infrastructure**~~ | **Done.** Models + migration applied; queue leases/retries/recovers under concurrency; outbox dispatches once; policy engine correct at boundaries; approval gate pauses and resumes a task; tool registry denies unlisted tools; audit log captures every transition; 143 tests + ruff + mypy green |
 | ~~2~~ | ~~**Agent runtime + Chief of Staff**~~ | **Done.** Chief of Staff interprets CEO commands (deterministic pattern matching, not an LLM — see agents/chief_of_staff/interpreter.py), answers status/decision queries from the database, executes kill-switch and campaign-control commands directly, and dispatches to a domain agent when one is registered — checked against the live registry, so a command needing an agent that doesn't exist yet is reported BLOCKED rather than faked. `cli/ceo.py` is the CEO's working interface until the Milestone 6 dashboard exists. 176 tests + ruff + mypy green |
 | ~~3~~ | ~~**Discovery chain**~~ | **Done.** Opportunity Discovery → Lead Discovery → Enrichment → Scoring, wired entirely through `config/agents.yaml` subscriptions (`opportunity.discovered` → `lead.discovered` → `lead.enriched`) — no agent calls another directly, proven by a test that drives the whole chain from one CEO command via `AGENTS.load_from_config()`. Scoring is a deterministic rule-based rubric, not an LLM call, and disqualifies leads below threshold rather than passing every lead downstream. Research prompts wrap external content as explicit untrusted data. Found and fixed a real migration-drift bug in the process (see §14, "Migration drift"). 226 tests + ruff + mypy green |
-| 4 | Outreach chain | Outreach drafts → approval → simulated send; Conversation Management handles a mock reply |
+| ~~4~~ | ~~**Outreach chain**~~ | **Done.** Outreach drafts an LLM-written email for every `lead.scored` lead (never `lead.disqualified`) and always requires approval — hand-drafted copy is never a CEO-approved template, so `template_approved=False` forces the require-approval tier regardless of the autonomy setting. Resuming after approval re-authorizes at the moment of execution (`policy.evaluate_after_approval`) rather than trusting the original decision forever: a suppression or kill switch engaged between approval and send still blocks it, proven by dedicated tests. Conversation Management matches inbound replies to the outbound message they answer via `provider_message_id` and advances the lead to `engaged`; it runs on the CEO's "check for replies" command rather than a subscription, since no periodic-polling mechanism exists yet. Found and fixed two real bugs: a self-collision where the duplicate-check ran after the row it was checking already existed (same bug class `evaluate_after_approval` was built to prevent, reintroduced in Outreach's own draft path), and a dry-run propagation gap where every event-triggered task fell back to the *global* dry-run default because `OutboxEvent` carried no memory of the task that emitted it. 265 tests + ruff + mypy green |
 | 5 | Close chain | Qualification → Sales → Proposal → approval → Customer |
 | 6 | CEO surface | Dashboard metrics, approval queue, CEO command interface, kill switches |
 | 7 | Simulated end-to-end test | Full slice green on mocks, nothing real sent |

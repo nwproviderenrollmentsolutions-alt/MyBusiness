@@ -1,7 +1,8 @@
-"""The full discovery chain, wired exactly the way config/agents.yaml wires it — not a
+"""The full pipeline, wired exactly the way config/agents.yaml wires it — not a
 hand-assembled registry. One CEO command flows through Opportunity Discovery -> Lead
-Discovery -> Lead Enrichment -> Lead Scoring purely via the task queue and event bus,
-with no test code calling one agent from another directly.
+Discovery -> Lead Enrichment -> Lead Scoring -> Outreach purely via the task queue and
+event bus, with no test code calling one agent from another directly, until it correctly
+stops and waits at the one point a human has to decide: approving the drafted email.
 """
 
 from __future__ import annotations
@@ -11,11 +12,11 @@ from sqlalchemy import func, select
 
 from core import task_queue
 from core.registry import AGENTS
-from db.enums import CommandStatus, LeadStatus, OpportunityStatus, TaskStatus
+from db.enums import ActionState, CommandStatus, LeadStatus, OpportunityStatus, TaskStatus
 from db.models.command import CeoCommand
 from db.models.market import Company, Opportunity, Prospect
-from db.models.pipeline import Lead, LeadScore
-from db.models.runtime import AgentTask
+from db.models.pipeline import Lead, LeadScore, Message
+from db.models.runtime import AgentTask, Approval
 from db.session import session_scope
 from worker import runner
 
@@ -27,14 +28,14 @@ _EXPECTED_AGENTS = {
     "lead_discovery",
     "lead_enrichment",
     "lead_scoring",
+    "outreach",
+    "conversation_management",
 }
 
-_ACTIVE_TASK_STATUSES = (
-    TaskStatus.PENDING,
-    TaskStatus.LEASED,
-    TaskStatus.RUNNING,
-    TaskStatus.AWAITING_APPROVAL,
-)
+#: A worker should never leave a task sitting in one of these — every task must either
+#: finish or be legitimately parked waiting on a human (AWAITING_APPROVAL, checked
+#: separately below since it's an expected outcome here, not a stuck one).
+_STUCK_TASK_STATUSES = (TaskStatus.PENDING, TaskStatus.LEASED, TaskStatus.RUNNING)
 
 
 def _drain_queue(*, max_passes: int = 50) -> int:
@@ -65,8 +66,9 @@ def test_a_ceo_command_flows_all_the_way_to_scored_leads(db):
         command_id = command.id
 
     executed = _drain_queue()
-    # chief_of_staff + opportunity_discovery + (lead_discovery + N * (enrichment + scoring))
-    assert executed >= 4
+    # chief_of_staff + opportunity_discovery + lead_discovery
+    # + N * (enrichment + scoring + outreach draft)
+    assert executed >= 5
 
     with session_scope() as session:
         resolved = session.get(CeoCommand, command_id)
@@ -81,11 +83,29 @@ def test_a_ceo_command_flows_all_the_way_to_scored_leads(db):
         leads = list(session.scalars(select(Lead)))
         assert len(leads) > 0
         assert all(lead.opportunity_id == opportunity.id for lead in leads)
-        assert all(lead.status in (LeadStatus.SCORED, LeadStatus.DISQUALIFIED) for lead in leads)
         assert all(lead.current_score is not None for lead in leads)
+        # A qualified lead doesn't stop at `scored` — Outreach picks it up automatically
+        # and drives it to `contacted` while its draft awaits approval. A disqualified
+        # one is never touched by Outreach at all.
+        assert all(
+            lead.status in (LeadStatus.CONTACTED, LeadStatus.DISQUALIFIED) for lead in leads
+        )
 
         scores = list(session.scalars(select(LeadScore)))
         assert len(scores) == len(leads)
+
+        contacted = [lead for lead in leads if lead.status is LeadStatus.CONTACTED]
+        assert contacted, "the mock ICP's default roles should score high enough to qualify"
+
+        # Every qualified lead has a drafted message sitting in pending_approval — the
+        # pipeline stopped exactly where a human is supposed to be asked, not before.
+        drafts = list(session.scalars(select(Message)))
+        assert len(drafts) == len(contacted)
+        assert all(m.state is ActionState.PENDING_APPROVAL for m in drafts)
+
+        approvals = list(session.scalars(select(Approval)))
+        assert len(approvals) == len(contacted)
+        assert all(a.subject_type == "message" for a in approvals)
 
         for company in session.scalars(select(Company)):
             assert company.is_mock is True
@@ -94,14 +114,21 @@ def test_a_ceo_command_flows_all_the_way_to_scored_leads(db):
             assert prospect.is_mock is True
             assert prospect.email.endswith(".invalid")
 
-        # Every task the chain spawned reached a terminal state — nothing left hanging
-        # waiting on a worker or a human.
+        # Nothing is sitting idle waiting on a worker. Tasks parked on a human decision
+        # (AWAITING_APPROVAL) are the expected, correct resting state here — one per
+        # drafted outreach message — not a stuck pipeline.
         stuck = session.scalar(
             select(func.count())
             .select_from(AgentTask)
-            .where(AgentTask.status.in_(_ACTIVE_TASK_STATUSES))
+            .where(AgentTask.status.in_(_STUCK_TASK_STATUSES))
         )
         assert stuck == 0
+        awaiting_approval = session.scalar(
+            select(func.count())
+            .select_from(AgentTask)
+            .where(AgentTask.status == TaskStatus.AWAITING_APPROVAL)
+        )
+        assert awaiting_approval == len(contacted)
 
 
 def test_direct_lead_discovery_command_skips_opportunity_discovery(db):
@@ -130,4 +157,6 @@ def test_direct_lead_discovery_command_skips_opportunity_discovery(db):
         leads = list(session.scalars(select(Lead)))
         assert len(leads) == 5
         assert all(lead.opportunity_id is None for lead in leads)
-        assert all(lead.status in (LeadStatus.SCORED, LeadStatus.DISQUALIFIED) for lead in leads)
+        assert all(
+            lead.status in (LeadStatus.CONTACTED, LeadStatus.DISQUALIFIED) for lead in leads
+        )

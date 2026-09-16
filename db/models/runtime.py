@@ -166,6 +166,11 @@ class OutboxEvent(Base, UUIDPrimaryKeyMixin):
     emitted_by: Mapped[str] = mapped_column(String(80), default="system")
     task_id: Mapped[uuid.UUID | None] = mapped_column(PGUUID(as_uuid=True), default=None)
     correlation_id: Mapped[uuid.UUID | None] = mapped_column(PGUUID(as_uuid=True), default=None)
+    #: Carried from the emitting task so a subscriber's task inherits it. Without this,
+    #: every event-triggered task would fall back to the *global* dry-run default instead
+    #: of the chain it's actually part of — breaking the guarantee (core/task_queue.py)
+    #: that a task created in dry run stays in dry run all the way through.
+    dry_run: Mapped[bool] = mapped_column(default=True)
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), index=True)
     processed_at: Mapped[datetime | None] = mapped_column(default=None)

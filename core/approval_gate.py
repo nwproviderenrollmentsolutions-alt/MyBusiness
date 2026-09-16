@@ -84,6 +84,7 @@ def request(
         emitted_by=agent,
         task_id=task.id if task else None,
         correlation_id=approval.correlation_id,
+        dry_run=task.dry_run if task else True,
     )
 
     if task is not None:
@@ -152,6 +153,7 @@ def approve(
         emitted_by="approval_gate",
         task_id=approval.task_id,
         correlation_id=approval.correlation_id,
+        dry_run=_dry_run_of(session, approval),
     )
     action_state_sync.sync_from_approval(
         session,
@@ -209,6 +211,7 @@ def reject(
         emitted_by="approval_gate",
         task_id=approval.task_id,
         correlation_id=approval.correlation_id,
+        dry_run=_dry_run_of(session, approval),
     )
     action_state_sync.sync_from_approval(
         session,
@@ -272,6 +275,7 @@ def expire_due(session: Session, *, limit: int = 100) -> list[Approval]:
             emitted_by="approval_gate",
             task_id=approval.task_id,
             correlation_id=approval.correlation_id,
+            dry_run=_dry_run_of(session, approval),
         )
         # Expiry never approves — the action does not happen, same as a rejection.
         action_state_sync.sync_from_approval(
@@ -322,6 +326,12 @@ def _load_pending(session: Session, approval_id: uuid.UUID) -> Approval:
 
 def _task_of(session: Session, approval: Approval) -> AgentTask | None:
     return session.get(AgentTask, approval.task_id) if approval.task_id else None
+
+
+def _dry_run_of(session: Session, approval: Approval) -> bool:
+    """The originating task's dry_run flag, or the safe default when there is none."""
+    task = _task_of(session, approval)
+    return task.dry_run if task is not None else True
 
 
 def _resume_task(session: Session, approval: Approval, *, reason: str) -> None:

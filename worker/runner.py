@@ -116,6 +116,7 @@ def _apply_output(
             emitted_by=agent.MANIFEST.name,
             task_id=task.id,
             correlation_id=task.correlation_id,
+            dry_run=task.dry_run,
         )
 
     for follow_up in output.follow_up_tasks:
