@@ -199,7 +199,9 @@ class AuditLog(Base, UUIDPrimaryKeyMixin):
     #: Why this happened — the policy rule, the CEO's note, or the triggering event.
     reason: Mapped[str | None] = mapped_column(Text, default=None)
 
-    task_id: Mapped[uuid.UUID | None] = mapped_column(PGUUID(as_uuid=True), default=None, index=True)
+    task_id: Mapped[uuid.UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), default=None, index=True
+    )
     run_id: Mapped[uuid.UUID | None] = mapped_column(PGUUID(as_uuid=True), default=None)
     correlation_id: Mapped[uuid.UUID | None] = mapped_column(
         PGUUID(as_uuid=True), default=None, index=True

@@ -51,7 +51,7 @@ alembic upgrade head
 # Tests
 pytest                       # unit tests
 pytest -m integration        # requires a live database
-ruff check . && mypy .
+ruff check . && python3 -m mypy .
 ```
 
 Copy `.env.example` to `.env` first. `.env` is git-ignored and is the only place secrets

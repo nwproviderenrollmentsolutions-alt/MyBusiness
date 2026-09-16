@@ -254,3 +254,6 @@ class PolicyDecision(StrEnum):
     ALLOW = "allow"
     REQUIRE_APPROVAL = "require_approval"
     DENY = "deny"
+    #: Authorized, but dry run is on: simulate instead of executing. Distinct from ALLOW
+    #: so no caller can treat "we would have been allowed" as permission to act for real.
+    SIMULATE = "simulate"
