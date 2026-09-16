@@ -14,6 +14,12 @@
 # so an agent cannot be deployed without declaring them. This file controls
 # wiring: what is turned on and what it listens to.
 #
-# Empty until Milestone 2. No agents are implemented yet.
+agents:
+  chief_of_staff:
+    module: agents.chief_of_staff.agent
+    enabled: true
+    concurrency: 1
+    subscribes_to: []
 
-agents: {}
+# No domain agents yet (Opportunity Discovery, Lead Discovery, Outreach, ...). Chief of
+# Staff commands that need one report BLOCKED honestly rather than pretending to dispatch.
