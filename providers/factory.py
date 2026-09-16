@@ -1,0 +1,124 @@
+"""Provider selection.
+
+Configuring a provider that is not implemented raises at startup rather than silently
+falling back to a mock. Quietly substituting a mock for a real email provider would mean
+believing messages were sent when they were not.
+"""
+
+from __future__ import annotations
+
+from functools import lru_cache
+
+from config.settings import get_settings
+from core.errors import PermanentError
+from providers.base import (
+    CalendarProvider,
+    CRMProvider,
+    EmailProvider,
+    LeadDiscoveryProvider,
+    LLMProvider,
+    PaymentProvider,
+    WebResearchProvider,
+)
+from providers.mock import (
+    MockCalendarProvider,
+    MockCRMProvider,
+    MockEmailProvider,
+    MockLeadDiscoveryProvider,
+    MockLLMProvider,
+    MockPaymentProvider,
+    MockWebResearchProvider,
+)
+
+
+def _unsupported(kind: str, name: str) -> PermanentError:
+    return PermanentError(
+        f"{kind} provider '{name}' is not implemented. "
+        f"Only 'mock' exists today; real providers land in Milestone 8."
+    )
+
+
+@lru_cache(maxsize=1)
+def get_llm_provider() -> LLMProvider:
+    settings = get_settings()
+    if settings.llm_provider == "mock":
+        return MockLLMProvider(seed=settings.mock_seed)
+    raise _unsupported("LLM", settings.llm_provider)
+
+
+@lru_cache(maxsize=1)
+def get_web_research_provider() -> WebResearchProvider:
+    settings = get_settings()
+    if settings.web_research_provider == "mock":
+        return MockWebResearchProvider(seed=settings.mock_seed)
+    raise _unsupported("Web research", settings.web_research_provider)
+
+
+@lru_cache(maxsize=1)
+def get_lead_discovery_provider() -> LeadDiscoveryProvider:
+    settings = get_settings()
+    if settings.lead_discovery_provider == "mock":
+        return MockLeadDiscoveryProvider(seed=settings.mock_seed)
+    raise _unsupported("Lead discovery", settings.lead_discovery_provider)
+
+
+@lru_cache(maxsize=1)
+def get_email_provider() -> EmailProvider:
+    settings = get_settings()
+    if settings.email_provider == "mock":
+        return MockEmailProvider(seed=settings.mock_seed)
+    raise _unsupported("Email", settings.email_provider)
+
+
+@lru_cache(maxsize=1)
+def get_crm_provider() -> CRMProvider:
+    settings = get_settings()
+    if settings.crm_provider == "mock":
+        return MockCRMProvider(seed=settings.mock_seed)
+    raise _unsupported("CRM", settings.crm_provider)
+
+
+@lru_cache(maxsize=1)
+def get_calendar_provider() -> CalendarProvider:
+    settings = get_settings()
+    if settings.calendar_provider == "mock":
+        return MockCalendarProvider(seed=settings.mock_seed)
+    raise _unsupported("Calendar", settings.calendar_provider)
+
+
+@lru_cache(maxsize=1)
+def get_payment_provider() -> PaymentProvider:
+    settings = get_settings()
+    if settings.payment_provider == "mock":
+        return MockPaymentProvider(seed=settings.mock_seed)
+    raise _unsupported("Payment", settings.payment_provider)
+
+
+def all_providers_are_mock() -> bool:
+    """Used by the dashboard to state plainly whether anything real is wired up."""
+    return all(
+        provider.is_mock
+        for provider in (
+            get_llm_provider(),
+            get_web_research_provider(),
+            get_lead_discovery_provider(),
+            get_email_provider(),
+            get_crm_provider(),
+            get_calendar_provider(),
+            get_payment_provider(),
+        )
+    )
+
+
+def reset_providers() -> None:
+    """Drop cached provider instances. Used by tests and after a config change."""
+    for factory in (
+        get_llm_provider,
+        get_web_research_provider,
+        get_lead_discovery_provider,
+        get_email_provider,
+        get_crm_provider,
+        get_calendar_provider,
+        get_payment_provider,
+    ):
+        factory.cache_clear()

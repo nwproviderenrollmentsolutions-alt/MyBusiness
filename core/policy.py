@@ -11,7 +11,7 @@ by a human clicking approve on a queue item.
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import timedelta
 from decimal import Decimal
 from typing import Any
@@ -26,6 +26,7 @@ from db.enums import (
     ALWAYS_APPROVAL_ACTIONS,
     CONTACT_ACTIONS,
     EXTERNAL_ACTIONS,
+    WORLD_CHANGING_ACTIONS,
     ActionState,
     ActionType,
     ActorType,
@@ -67,6 +68,9 @@ class Decision:
     decision: PolicyDecision
     rule: str
     reason: str
+    #: Which action this decision authorizes. The tool registry checks it so an
+    #: authorization for a harmless action cannot be reused for a dangerous one.
+    action_type: ActionType | None = None
 
     @property
     def allowed(self) -> bool:
@@ -92,7 +96,7 @@ def evaluate(session: Session, ctx: PolicyContext, *, record_audit: bool = True)
     Every evaluation is written to the audit log, including allows, so the CEO can always
     answer "why did this go out?" from the record alone.
     """
-    decision = _evaluate(session, ctx)
+    decision = replace(_evaluate(session, ctx), action_type=ctx.action_type)
     if record_audit:
         audit.record(
             session,
@@ -237,8 +241,10 @@ def _evaluate(session: Session, ctx: PolicyContext) -> Decision:
             f"{ctx.action_type} is set to approval_required",
         )
 
-    # 12. Authorized — but dry run means simulate rather than execute.
-    if ctx.dry_run and is_external:
+    # 12. Authorized — but in dry run, anything that would change the outside world is
+    #     simulated. Research still executes: dry run means nobody is contacted, not that
+    #     the system stops thinking.
+    if ctx.dry_run and ctx.action_type in WORLD_CHANGING_ACTIONS:
         return Decision(
             PolicyDecision.SIMULATE,
             "dry_run",

@@ -59,6 +59,22 @@ EXTERNAL_ACTIONS: frozenset[ActionType] = frozenset(
     }
 )
 
+#: Actions that change the outside world rather than only reading it. These are what dry
+#: run simulates; research and enrichment still execute in dry run, which is the point of
+#: dry run — the system can think and prepare without anyone being contacted.
+WORLD_CHANGING_ACTIONS: frozenset[ActionType] = frozenset(
+    {
+        ActionType.OUTREACH_SEND_EMAIL,
+        ActionType.OUTREACH_SEND_FOLLOWUP,
+        ActionType.CONVERSATION_REPLY,
+        ActionType.MEETING_SCHEDULE,
+        ActionType.PROPOSAL_SEND,
+        ActionType.CRM_SYNC,
+        ActionType.CUSTOMER_CREATE,
+        ActionType.PAYMENT_CHARGE,
+    }
+)
+
 #: Actions that contact a person. Always suppression- and rate-limit-checked.
 CONTACT_ACTIONS: frozenset[ActionType] = frozenset(
     {
