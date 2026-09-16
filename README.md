@@ -10,7 +10,7 @@ the state machines, the security posture, and the milestone plan.
 
 | Milestone | State |
 |---|---|
-| 1. Core infrastructure | in progress |
+| 1. Core infrastructure | **complete** — 143 tests, ruff + mypy strict green |
 | 2. Agent runtime + Chief of Staff | not started |
 | 3–5. Revenue vertical slice | not started |
 | 6. CEO dashboard + command interface | not started |

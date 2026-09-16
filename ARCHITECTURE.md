@@ -240,7 +240,17 @@ that crashes mid-way cannot leave a half-committed side effect.
 
 ## 8. Policy engine and permissions
 
-`policy.evaluate(action_type, context) -> Decision(allow | require_approval | deny, reason)`.
+`policy.evaluate(action_type, context) -> Decision(allow | require_approval | deny | simulate, reason)`.
+
+`simulate` is a separate outcome from `allow` on purpose: under dry run an action may be
+fully authorized and still must not execute, and no caller should be able to read "would
+have been allowed" as permission to act. The decision also carries the action type it
+authorized, which the tool registry checks — so an authorization for `lead.score` cannot
+be laundered into permission to send email.
+
+Dry run simulates only **world-changing** actions (`WORLD_CHANGING_ACTIONS` in
+`db/enums.py`). Research and enrichment still execute, because dry run means nobody is
+contacted, not that the system stops thinking.
 
 Evaluated in order, first match wins:
 
@@ -340,7 +350,7 @@ reproducible, and every record they produce is flagged `is_mock`.
 
 | # | Milestone | Acceptance criteria |
 |---|---|---|
-| **1** | **Core infrastructure** | Models + migration applied; queue leases/retries/recovers under concurrency; outbox dispatches once; policy engine returns correct decisions at boundaries; approval gate pauses and resumes a task; tool registry denies unlisted tools; audit log captures every transition; tests + ruff + mypy green |
+| ~~1~~ | ~~**Core infrastructure**~~ | **Done.** Models + migration applied; queue leases/retries/recovers under concurrency; outbox dispatches once; policy engine correct at boundaries; approval gate pauses and resumes a task; tool registry denies unlisted tools; audit log captures every transition; 143 tests + ruff + mypy green |
 | 2 | Agent runtime + Chief of Staff | Worker executes registered agents with timeout/retry/cost tracking; CEO command translated into tasks |
 | 3 | Discovery chain | Opportunity Discovery → Lead Discovery → Enrichment → Scoring on mock providers |
 | 4 | Outreach chain | Outreach drafts → approval → simulated send; Conversation Management handles a mock reply |
