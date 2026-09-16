@@ -73,13 +73,13 @@ def dispatch_pending(session: Session, *, limit: int = 50) -> int:
             task_queue.enqueue(
                 session,
                 agent=agent_name,
-                task_input={
-                    "event_type": event.event_type,
-                    "event_id": str(event.id),
-                    "subject_type": event.subject_type,
-                    "subject_id": str(event.subject_id) if event.subject_id else None,
-                    "payload": event.payload,
-                },
+                # The event's payload IS the task input, not an envelope around it. An
+                # agent's input schema is the same whether it was dispatched directly (a
+                # CEO command) or by a subscription — it should never need to branch on
+                # which. Lineage back to the triggering event survives anyway: the dedupe
+                # key encodes the event id, and correlation_id ties the whole chain
+                # together in the audit log.
+                task_input=dict(event.payload),
                 dedupe_key=f"event:{event.id}:{agent_name}",
                 correlation_id=event.correlation_id,
                 parent_task_id=event.task_id,

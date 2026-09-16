@@ -197,6 +197,17 @@ caused them, then dispatched by the worker to subscribers declared in `config/ag
 Dispatch creates new tasks. An emitting agent never knows who consumes its events, which is
 precisely how a later Fulfillment agent subscribes to `deal.won` without touching Sales.
 
+A subscriber's task is created with `task_input = event.payload` directly — no envelope.
+An agent's declared input schema is therefore the same whether the task arrived from a CEO
+command or from a subscription; it never branches on trigger source. This does mean an
+event's payload shape is a real contract: an emitting agent's payload must match what its
+subscribers' input schemas expect. With one subscriber per event type today that's a
+non-issue; if an event type ever gains a second subscriber wanting a different shape, that
+subscriber adapts the same payload rather than the event changing shape for everyone.
+Lineage back to the triggering event is not lost — the task's `dedupe_key` encodes the
+event id (`event:<id>:<agent>`) and `correlation_id` ties the whole chain together in the
+audit log.
+
 **Idempotency.** Three layers: `dedupe_key` on tasks, `idempotency_key` on outbound messages
 (unique), and provider-level keys passed to external APIs so a retry after a timeout cannot
 double-send.
