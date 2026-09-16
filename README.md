@@ -16,7 +16,7 @@ the state machines, the security posture, and the milestone plan.
 | 4. Outreach chain (Outreach + Conversation Management) | **complete** — 265 tests, ruff + mypy strict green |
 | 5. Close chain (Qualification → Sales → Proposal → Customer) | **complete** — 314 tests, ruff + mypy strict green |
 | 6. CEO dashboard (web) | **complete** — 342 tests, ruff + mypy strict green |
-| 7. Simulated end-to-end test | not started |
+| 7. Simulated end-to-end test | **complete** — 343 tests, ruff + mypy strict green |
 | 8. Real providers | not started |
 
 ## CEO command line
