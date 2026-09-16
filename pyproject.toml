@@ -54,15 +54,18 @@ plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 # Application code is strictly typed. Tests are asserted behavior, not a public API, and
-# annotating every fixture adds noise without catching bugs.
-module = ["tests.*"]
+# annotating every fixture adds noise without catching bugs. Covers both tests/ and each
+# agent's own agents/<name>/tests/ package.
+module = ["tests.*", "agents.*.tests.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 disallow_untyped_calls = false
 check_untyped_defs = false
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# Cross-cutting infra tests live under tests/; each agent's own tests live next to its
+# code in agents/<name>/tests/, per the per-agent package layout in ARCHITECTURE.md.
+testpaths = ["tests", "agents"]
 markers = [
     "integration: requires a live Postgres database",
 ]

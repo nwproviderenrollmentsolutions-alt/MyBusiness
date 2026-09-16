@@ -295,6 +295,10 @@ class CommandStatus(StrEnum):
     ANSWERED = "answered"
     #: A direct system action was taken (kill switch, campaign control).
     EXECUTED = "executed"
+    #: A follow-up task was created for the agent that handles this. Fire-and-forget for
+    #: now — tracking the task through to completion is deferred until a generic
+    #: task-completion event exists to drive it back to this row.
+    DISPATCHED = "dispatched"
     #: Understood, but the agent(s) it needs do not exist yet.
     BLOCKED = "blocked"
     #: The interpreter could not classify the command at all.
@@ -302,6 +306,7 @@ class CommandStatus(StrEnum):
     FAILED = "failed"
 
 
+#: DISPATCHED is deliberately excluded: the command isn't done, work is in flight.
 TERMINAL_COMMAND_STATUSES: frozenset[CommandStatus] = frozenset(
     {
         CommandStatus.ANSWERED,
