@@ -356,6 +356,21 @@ reproducible, and every record they produce is flagged `is_mock`.
   outreach → reply → qualification → deal → proposal → approval, entirely on mock providers,
   asserting no real external call occurs and every step is audited.
 - **Gates**: `ruff` (lint), `mypy` (types), `pytest` — all must pass before a milestone closes.
+- **Migration drift**: `create_all()` (used by every other integration test, for speed)
+  builds schema straight from current models and will happily agree with itself even when
+  a model change and its migration have diverged. Only a database built the production way
+  — `alembic upgrade head` — proves the migration chain actually produces what the models
+  expect. `tests/integration/test_migrations.py` does this for schema shape, reversibility,
+  and (`test_every_state_check_constraint_matches_its_python_enum`) for every state
+  column's CHECK constraint against its Python enum's current value set. That last one is
+  a real regression test: Milestone 3 added `CommandStatus.DISPATCHED` after the
+  `ceo_commands` migration had shipped, and it passed every test in the suite because none
+  of them touched the real migration chain — Alembic's autogenerate does not diff CHECK
+  constraint bodies, only presence or absence, so `alembic check` reported nothing to fix
+  either. It surfaced only when the CLI was run against a database built with
+  `alembic upgrade head`. **Lesson institutionalized**: adding a value to any enum backing
+  a `state_column` needs a hand-written migration to alter that CHECK constraint — nothing
+  in the toolchain generates it automatically, and this test is what would catch a repeat.
 
 ## 15. Milestones
 
@@ -363,7 +378,7 @@ reproducible, and every record they produce is flagged `is_mock`.
 |---|---|---|
 | ~~1~~ | ~~**Core infrastructure**~~ | **Done.** Models + migration applied; queue leases/retries/recovers under concurrency; outbox dispatches once; policy engine correct at boundaries; approval gate pauses and resumes a task; tool registry denies unlisted tools; audit log captures every transition; 143 tests + ruff + mypy green |
 | ~~2~~ | ~~**Agent runtime + Chief of Staff**~~ | **Done.** Chief of Staff interprets CEO commands (deterministic pattern matching, not an LLM — see agents/chief_of_staff/interpreter.py), answers status/decision queries from the database, executes kill-switch and campaign-control commands directly, and dispatches to a domain agent when one is registered — checked against the live registry, so a command needing an agent that doesn't exist yet is reported BLOCKED rather than faked. `cli/ceo.py` is the CEO's working interface until the Milestone 6 dashboard exists. 176 tests + ruff + mypy green |
-| 3 | Discovery chain | Opportunity Discovery → Lead Discovery → Enrichment → Scoring on mock providers |
+| ~~3~~ | ~~**Discovery chain**~~ | **Done.** Opportunity Discovery → Lead Discovery → Enrichment → Scoring, wired entirely through `config/agents.yaml` subscriptions (`opportunity.discovered` → `lead.discovered` → `lead.enriched`) — no agent calls another directly, proven by a test that drives the whole chain from one CEO command via `AGENTS.load_from_config()`. Scoring is a deterministic rule-based rubric, not an LLM call, and disqualifies leads below threshold rather than passing every lead downstream. Research prompts wrap external content as explicit untrusted data. Found and fixed a real migration-drift bug in the process (see §14, "Migration drift"). 226 tests + ruff + mypy green |
 | 4 | Outreach chain | Outreach drafts → approval → simulated send; Conversation Management handles a mock reply |
 | 5 | Close chain | Qualification → Sales → Proposal → approval → Customer |
 | 6 | CEO surface | Dashboard metrics, approval queue, CEO command interface, kill switches |

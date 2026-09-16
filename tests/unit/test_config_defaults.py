@@ -56,6 +56,12 @@ def test_every_provider_defaults_to_mock():
     } == {"mock"}
 
 
-def test_only_chief_of_staff_is_wired_so_far():
-    """Milestone 2 ships Chief of Staff only; claiming a domain agent exists would be fake."""
-    assert set(get_agents_config().agents) == {"chief_of_staff"}
+def test_only_the_revenue_slice_agents_are_wired_so_far():
+    """No Outreach, Sales, or Proposal agent yet; claiming one exists would be fake."""
+    assert set(get_agents_config().agents) == {
+        "chief_of_staff",
+        "opportunity_discovery",
+        "lead_discovery",
+        "lead_enrichment",
+        "lead_scoring",
+    }

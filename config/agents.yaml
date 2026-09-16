@@ -21,5 +21,33 @@ agents:
     concurrency: 1
     subscribes_to: []
 
-# No domain agents yet (Opportunity Discovery, Lead Discovery, Outreach, ...). Chief of
-# Staff commands that need one report BLOCKED honestly rather than pretending to dispatch.
+  opportunity_discovery:
+    module: agents.opportunity_discovery.agent
+    enabled: true
+    concurrency: 1
+    subscribes_to: []
+
+  lead_discovery:
+    module: agents.lead_discovery.agent
+    enabled: true
+    concurrency: 1
+    subscribes_to:
+      - opportunity.discovered
+
+  lead_enrichment:
+    module: agents.lead_enrichment.agent
+    enabled: true
+    concurrency: 2
+    subscribes_to:
+      - lead.discovered
+
+  lead_scoring:
+    module: agents.lead_scoring.agent
+    enabled: true
+    concurrency: 2
+    subscribes_to:
+      - lead.enriched
+
+# Outreach, Conversation Management, Qualification, Sales, and Proposal don't exist yet.
+# A CEO command needing one of them (e.g. "start a campaign for ...") reports BLOCKED
+# honestly rather than pretending to dispatch.

@@ -8,18 +8,40 @@ from core.registry import AGENTS
 
 pytestmark = pytest.mark.integration
 
+_EXPECTED_AGENTS = {
+    "chief_of_staff",
+    "opportunity_discovery",
+    "lead_discovery",
+    "lead_enrichment",
+    "lead_scoring",
+}
 
-def test_chief_of_staff_loads_from_the_shipped_config(db):
+
+def test_all_shipped_agents_load_from_config(db):
     loaded = AGENTS.load_from_config()
 
-    assert "chief_of_staff" in loaded
-    agent = AGENTS.get("chief_of_staff")
-    assert agent.MANIFEST.name == "chief_of_staff"
-    assert agent.MANIFEST.version
+    assert set(loaded) == _EXPECTED_AGENTS
+    for name in _EXPECTED_AGENTS:
+        agent = AGENTS.get(name)
+        assert agent.MANIFEST.name == name
+        assert agent.MANIFEST.version
 
 
-def test_no_domain_agents_are_wired_yet(db):
-    """Milestone 2 ships zero business agents. Wiring one in without building it would be
-    a fake capability."""
-    loaded = AGENTS.load_from_config()
-    assert loaded == ["chief_of_staff"]
+def test_no_agents_beyond_the_revenue_slice_are_wired_yet():
+    """Outreach, Conversation Management, Qualification, Sales, Proposal don't exist yet.
+    Wiring one in without building it would be a fake capability."""
+    from config.settings import get_agents_config
+
+    assert set(get_agents_config().agents) == _EXPECTED_AGENTS
+
+
+def test_discovery_chain_subscriptions_match_the_events_each_agent_emits():
+    """The event/payload contract (ARCHITECTURE.md): a subscriber's declared input schema
+    must match what the emitting agent puts in the event payload — spot-check the wiring
+    that makes the chain actually connect end to end."""
+    from config.settings import get_agents_config
+
+    agents_config = get_agents_config()
+    assert agents_config.subscribers_of("opportunity.discovered") == ["lead_discovery"]
+    assert agents_config.subscribers_of("lead.discovered") == ["lead_enrichment"]
+    assert agents_config.subscribers_of("lead.enriched") == ["lead_scoring"]
