@@ -15,10 +15,10 @@ from sqlalchemy import case, select
 from sqlalchemy.orm import Session
 
 from config.settings import get_policy_config
-from core import audit, event_bus, task_queue
+from core import action_state_sync, audit, event_bus, task_queue
 from core.errors import ApprovalStateError
 from core.task_queue import db_now
-from db.enums import ActionType, ApprovalStatus, RiskLevel
+from db.enums import ActionState, ActionType, ApprovalStatus, RiskLevel
 from db.models.runtime import AgentTask, Approval
 
 _AUDIT_FIELDS = ("status", "decided_by", "decided_at")
@@ -142,10 +142,23 @@ def approve(
         event_type="approval.approved",
         subject_type="approval",
         subject_id=approval.id,
-        payload={"action_type": approval.action_type, "decided_by": decided_by},
+        payload={
+            "approval_id": str(approval.id),
+            "action_type": approval.action_type,
+            "decided_by": decided_by,
+            "subject_type": approval.subject_type,
+            "subject_id": str(approval.subject_id) if approval.subject_id else None,
+        },
         emitted_by="approval_gate",
         task_id=approval.task_id,
         correlation_id=approval.correlation_id,
+    )
+    action_state_sync.sync_from_approval(
+        session,
+        subject_type=approval.subject_type,
+        subject_id=approval.subject_id,
+        target=ActionState.APPROVED,
+        decided_by=decided_by,
     )
     _resume_task(session, approval, reason=f"approved by {decided_by}")
     return approval
@@ -185,10 +198,24 @@ def reject(
         event_type="approval.rejected",
         subject_type="approval",
         subject_id=approval.id,
-        payload={"action_type": approval.action_type, "decided_by": decided_by, "notes": notes},
+        payload={
+            "approval_id": str(approval.id),
+            "action_type": approval.action_type,
+            "decided_by": decided_by,
+            "notes": notes,
+            "subject_type": approval.subject_type,
+            "subject_id": str(approval.subject_id) if approval.subject_id else None,
+        },
         emitted_by="approval_gate",
         task_id=approval.task_id,
         correlation_id=approval.correlation_id,
+    )
+    action_state_sync.sync_from_approval(
+        session,
+        subject_type=approval.subject_type,
+        subject_id=approval.subject_id,
+        target=ActionState.REJECTED,
+        decided_by=decided_by,
     )
 
     task = _task_of(session, approval)
@@ -236,10 +263,23 @@ def expire_due(session: Session, *, limit: int = 100) -> list[Approval]:
             event_type="approval.expired",
             subject_type="approval",
             subject_id=approval.id,
-            payload={"action_type": approval.action_type},
+            payload={
+                "approval_id": str(approval.id),
+                "action_type": approval.action_type,
+                "subject_type": approval.subject_type,
+                "subject_id": str(approval.subject_id) if approval.subject_id else None,
+            },
             emitted_by="approval_gate",
             task_id=approval.task_id,
             correlation_id=approval.correlation_id,
+        )
+        # Expiry never approves — the action does not happen, same as a rejection.
+        action_state_sync.sync_from_approval(
+            session,
+            subject_type=approval.subject_type,
+            subject_id=approval.subject_id,
+            target=ActionState.REJECTED,
+            decided_by="system (expired)",
         )
         task = _task_of(session, approval)
         if task is not None:

@@ -384,3 +384,95 @@ def test_denials_record_which_rule_fired(db, policy, lead, campaign):
         .order_by(AuditLog.created_at.desc())
     )
     assert entry.after["rule"] == "emergency_stop"
+
+
+# --- Post-approval re-authorization -----------------------------------------------
+
+
+def test_approved_action_executes_without_re_litigating_the_approval_tier(
+    db, policy, lead, campaign
+):
+    """Autonomy-off and unapproved-template are what the human was asked to judge —
+    evaluate_after_approval must not ask again."""
+    policy(make_policy())  # default: approval_required for everything
+
+    decision = policy_engine.evaluate_after_approval(
+        db, _send_ctx(lead, campaign, template_approved=False)
+    )
+    assert decision.allowed
+    assert decision.rule == "ceo_approved"
+
+
+def test_dry_run_still_simulates_even_after_approval(db, policy, lead, campaign):
+    policy(make_policy())
+
+    decision = policy_engine.evaluate_after_approval(
+        db, _send_ctx(lead, campaign, dry_run=True, template_approved=False)
+    )
+    assert decision.simulate
+    assert decision.rule == "ceo_approved_dry_run"
+
+
+def test_suppression_added_after_approval_still_blocks_the_send(db, policy, lead, campaign):
+    """An approval from before the suppression is not permission to ignore it."""
+    policy(make_policy())
+    suppression.add_suppression(
+        db, scope=SuppressionScope.EMAIL, value="sam@acme.invalid", reason="unsubscribed since"
+    )
+
+    decision = policy_engine.evaluate_after_approval(
+        db, _send_ctx(lead, campaign, template_approved=False)
+    )
+    assert decision.denied
+    assert decision.rule == "suppressed"
+
+
+def test_emergency_stop_engaged_after_approval_still_blocks_the_send(db, policy, lead, campaign):
+    policy(make_policy())
+    flags.engage_emergency_stop(db, engaged_by="ceo", reason="something looks wrong")
+
+    decision = policy_engine.evaluate_after_approval(
+        db, _send_ctx(lead, campaign, template_approved=False)
+    )
+    assert decision.denied
+    assert decision.rule == "emergency_stop"
+
+
+def test_post_approval_does_not_self_deny_on_the_message_it_is_about_to_send(
+    db, policy, lead, campaign
+):
+    """The message row this approval covers already exists with this exact idempotency
+    key — re-running the duplicate check would find itself and refuse the send."""
+    policy(make_policy(autonomy=AUTONOMOUS_EMAIL))
+    _make_sent_message(db, lead, key="the-approved-message", state=ActionState.APPROVED)
+
+    decision = policy_engine.evaluate_after_approval(
+        db, _send_ctx(lead, campaign, idempotency_key="the-approved-message")
+    )
+    assert decision.allowed
+
+
+def test_post_approval_does_not_self_deny_on_the_daily_cap_it_already_occupies(
+    db, policy, lead, campaign
+):
+    """The message being sent is already counted as APPROVED against today's cap — the
+    limit check that matters ran once already, before this row existed."""
+    policy(make_policy(autonomy=AUTONOMOUS_EMAIL, limits={"global_daily_outbound_max": 1}))
+    _make_sent_message(db, lead, key="occupies-the-cap", state=ActionState.APPROVED)
+
+    decision = policy_engine.evaluate_after_approval(db, _send_ctx(lead, campaign))
+    assert decision.allowed
+
+
+def test_post_approval_decisions_are_audited(db, policy, lead, campaign):
+    policy(make_policy())
+    policy_engine.evaluate_after_approval(db, _send_ctx(lead, campaign, template_approved=False))
+    db.commit()
+
+    entry = db.scalar(
+        select(AuditLog)
+        .where(AuditLog.action == "policy.evaluated")
+        .order_by(AuditLog.created_at.desc())
+    )
+    assert entry.after["post_approval"] is True
+    assert entry.after["rule"] == "ceo_approved"

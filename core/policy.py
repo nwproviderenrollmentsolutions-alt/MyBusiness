@@ -118,7 +118,75 @@ def evaluate(session: Session, ctx: PolicyContext, *, record_audit: bool = True)
     return decision
 
 
-def _evaluate(session: Session, ctx: PolicyContext) -> Decision:
+def evaluate_after_approval(
+    session: Session, ctx: PolicyContext, *, record_audit: bool = True
+) -> Decision:
+    """Re-authorize an action a human already approved, immediately before executing it.
+
+    Approval satisfies the *require-approval* tier this context would otherwise hit —
+    autonomy off, an unapproved template, a value/discount threshold. That is what the
+    human was asked to judge, and this function does not ask it again. It does not
+    satisfy the *deny* tier: if the recipient has been suppressed, a kill switch engaged,
+    or the campaign killed since the approval was requested, execution is still blocked.
+    An approval granted an hour ago is not permission to ignore what changed since.
+
+    Deliberately narrower than a full re-``evaluate``: the duplicate check and volume
+    limits are excluded on purpose. By the time this runs, the message row the approval
+    covers already exists (and, once ``core.action_state_sync`` has processed the
+    approval, is already in the ``approved`` state) — re-running the duplicate check
+    would find that exact row and reject the action as a duplicate of itself, and
+    re-running the volume-limit count would count that same row against itself,
+    denying a send that is precisely at, not over, the limit. Both checks already ran
+    correctly once, before the row existed, at draft time.
+    """
+    ctx_without_idempotency = replace(ctx, idempotency_key=None)
+    gate = _safety_gates(session, ctx_without_idempotency)
+    if gate is not None:
+        decision = replace(gate, action_type=ctx.action_type)
+    elif ctx.dry_run and ctx.action_type in WORLD_CHANGING_ACTIONS:
+        decision = Decision(
+            PolicyDecision.SIMULATE,
+            "ceo_approved_dry_run",
+            "approved by the CEO; simulated because dry run is on",
+            action_type=ctx.action_type,
+        )
+    else:
+        decision = Decision(
+            PolicyDecision.ALLOW,
+            "ceo_approved",
+            "approved by the CEO",
+            action_type=ctx.action_type,
+        )
+
+    if record_audit:
+        audit.record(
+            session,
+            actor_type=ActorType.AGENT,
+            actor=ctx.agent,
+            action="policy.evaluated",
+            subject_type="policy",
+            subject_id=ctx.lead_id or ctx.campaign_id,
+            after={
+                "action_type": str(ctx.action_type),
+                "decision": str(decision.decision),
+                "rule": decision.rule,
+                "dry_run": ctx.dry_run,
+                "post_approval": True,
+            },
+            reason=decision.reason,
+            task_id=ctx.task_id,
+            correlation_id=ctx.correlation_id,
+        )
+    return decision
+
+
+def _safety_gates(session: Session, ctx: PolicyContext) -> Decision | None:
+    """Rules 1-3 and 5: the ones that must hold even for an action a human already
+    approved. A recipient can ask to be suppressed, or the CEO can hit the kill switch,
+    at any moment — an approval granted before that moment is not permission to ignore
+    it. ``evaluate_after_approval`` re-runs only this subset; volume limits and the
+    duplicate check are deliberately excluded (see that function's docstring).
+    """
     policy = get_policy_config()
     is_external = ctx.action_type in EXTERNAL_ACTIONS
     is_contact = ctx.action_type in CONTACT_ACTIONS
@@ -153,16 +221,6 @@ def _evaluate(session: Session, ctx: PolicyContext) -> Decision:
                 f"recipient is on the do-not-contact list ({entry.scope}: {entry.reason})",
             )
 
-    # 4. Duplicate. The same logical send must never happen twice.
-    if ctx.idempotency_key:
-        existing = suppression.message_exists(session, ctx.idempotency_key)
-        if existing is not None:
-            return Decision(
-                PolicyDecision.DENY,
-                "duplicate",
-                f"message {existing.id} already exists for this idempotency key",
-            )
-
     # 5. Campaign kill switch.
     if is_contact and ctx.campaign_id is not None:
         campaign = session.get(Campaign, ctx.campaign_id)
@@ -179,6 +237,29 @@ def _evaluate(session: Session, ctx: PolicyContext) -> Decision:
                 PolicyDecision.DENY,
                 "campaign_not_active",
                 f"campaign is {campaign.status}",
+            )
+
+    return None
+
+
+def _evaluate(session: Session, ctx: PolicyContext) -> Decision:
+    policy = get_policy_config()
+    is_external = ctx.action_type in EXTERNAL_ACTIONS
+    is_contact = ctx.action_type in CONTACT_ACTIONS
+    autonomy = policy.autonomy_for(ctx.action_type)
+
+    gate = _safety_gates(session, ctx)
+    if gate is not None:
+        return gate
+
+    # 4. Duplicate. The same logical send must never happen twice.
+    if ctx.idempotency_key:
+        existing = suppression.message_exists(session, ctx.idempotency_key)
+        if existing is not None:
+            return Decision(
+                PolicyDecision.DENY,
+                "duplicate",
+                f"message {existing.id} already exists for this idempotency key",
             )
 
     # 6. Volume limits. Safety rails, not targets.
