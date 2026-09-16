@@ -266,6 +266,53 @@ class SuppressionScope(StrEnum):
     PHONE = "phone"
 
 
+class CommandIntent(StrEnum):
+    """What the Chief of Staff understood a CEO command to mean.
+
+    The interpreter is deterministic pattern matching, not an LLM (see
+    agents/chief_of_staff/interpreter.py) — free-form NLU choosing which tasks to create
+    would be an uncontrolled path to task creation. Richer interpretation can replace it
+    later behind the same interpret(text) -> ParsedCommand interface without touching the
+    agent or the runtime contract.
+    """
+
+    FIND_OPPORTUNITIES = "find_opportunities"
+    FIND_LEADS = "find_leads"
+    START_CAMPAIGN = "start_campaign"
+    PAUSE_CAMPAIGN = "pause_campaign"
+    RESUME_CAMPAIGN = "resume_campaign"
+    KILL_CAMPAIGN = "kill_campaign"
+    SHOW_DECISIONS = "show_decisions"
+    SHOW_STATUS = "show_status"
+    ENGAGE_KILL_SWITCH = "engage_kill_switch"
+    RELEASE_KILL_SWITCH = "release_kill_switch"
+    UNKNOWN = "unknown"
+
+
+class CommandStatus(StrEnum):
+    PENDING = "pending"
+    #: Answered directly from current state (a status/decisions query).
+    ANSWERED = "answered"
+    #: A direct system action was taken (kill switch, campaign control).
+    EXECUTED = "executed"
+    #: Understood, but the agent(s) it needs do not exist yet.
+    BLOCKED = "blocked"
+    #: The interpreter could not classify the command at all.
+    UNRECOGNIZED = "unrecognized"
+    FAILED = "failed"
+
+
+TERMINAL_COMMAND_STATUSES: frozenset[CommandStatus] = frozenset(
+    {
+        CommandStatus.ANSWERED,
+        CommandStatus.EXECUTED,
+        CommandStatus.BLOCKED,
+        CommandStatus.UNRECOGNIZED,
+        CommandStatus.FAILED,
+    }
+)
+
+
 class PolicyDecision(StrEnum):
     ALLOW = "allow"
     REQUIRE_APPROVAL = "require_approval"
