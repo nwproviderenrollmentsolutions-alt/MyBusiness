@@ -23,6 +23,7 @@ from collections.abc import Iterator, Mapping  # noqa: E402
 from typing import Any  # noqa: E402
 
 import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import Engine, text  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 
@@ -134,3 +135,16 @@ def agents_config(monkeypatch: pytest.MonkeyPatch) -> Any:
         return config
 
     return _install
+
+
+@pytest.fixture
+def client(db: Session) -> Iterator[TestClient]:
+    """A TestClient against the real API app, real Postgres underneath (the `db` fixture
+    dependency is what gives us the schema and per-test truncation). The `with` block
+    matters: it is what runs the app's lifespan (register_builtin_tools +
+    AGENTS.load_from_config), same as a real server starting up.
+    """
+    from api.main import app
+
+    with TestClient(app) as test_client:
+        yield test_client

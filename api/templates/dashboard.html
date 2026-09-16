@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MyBusiness — CEO Console</title>
+<style>
+  body { font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+  h2 { font-size: 1.1rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; }
+  .banner { padding: 0.75rem 1rem; border-radius: 6px; margin: 1rem 0; font-weight: 600; }
+  .banner.stopped { background: #fde2e2; color: #a12222; }
+  .banner.running { background: #e6f4ea; color: #1e7a34; }
+  table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid #eee; font-size: 0.92rem; }
+  th { color: #666; font-weight: 600; }
+  .risk-low { color: #1e7a34; }
+  .risk-medium { color: #a17a00; }
+  .risk-high, .risk-critical { color: #a12222; font-weight: 600; }
+  form.inline { display: inline; }
+  form.inline input[type=text] { width: 8rem; padding: 0.2rem; font-size: 0.85rem; }
+  button { cursor: pointer; border: none; border-radius: 4px; padding: 0.3rem 0.7rem; font-size: 0.85rem; }
+  button.approve { background: #1e7a34; color: white; }
+  button.reject { background: #a12222; color: white; }
+  button.stop { background: #a12222; color: white; padding: 0.5rem 1.2rem; font-size: 1rem; }
+  button.go { background: #1e7a34; color: white; padding: 0.5rem 1.2rem; font-size: 1rem; }
+  .empty { color: #888; font-style: italic; }
+  .command-form input[type=text] { width: 60%; padding: 0.4rem; }
+  code { background: #f4f4f4; padding: 0.1rem 0.3rem; border-radius: 3px; }
+</style>
+</head>
+<body>
+  <h1>MyBusiness — CEO Console</h1>
+
+  {% if emergency_stopped %}
+  <div class="banner stopped">
+    Emergency stop is ENGAGED — no outbound action will execute.
+    <form class="inline" method="post" action="/dashboard/system/go">
+      <button class="go" type="submit">Release</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="banner running">
+    Running normally.
+    <form class="inline" method="post" action="/dashboard/system/stop">
+      <button class="stop" type="submit">Emergency stop</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <h2>Business snapshot</h2>
+  <table>
+    <tr><th>Opportunities</th><th>Companies</th><th>Prospects</th><th>Leads</th><th>Deals</th><th>Customers</th></tr>
+    <tr>
+      <td>{{ status.counts.opportunities }}</td>
+      <td>{{ status.counts.companies }}</td>
+      <td>{{ status.counts.prospects }}</td>
+      <td>{{ status.counts.leads }}</td>
+      <td>{{ status.counts.deals }}</td>
+      <td>{{ status.counts.customers }}</td>
+    </tr>
+  </table>
+  <p>
+    Active campaigns: {{ status.active_campaigns }} &middot;
+    Pending approvals: {{ status.pending_approvals }} &middot;
+    Business agents running: {{ status.domain_agents_running | join(", ") if status.domain_agents_running else "none yet" }}
+  </p>
+
+  <h2>Pending approvals</h2>
+  {% if approvals %}
+  <table>
+    <tr><th>Risk</th><th>Action</th><th>Summary</th><th>Decide</th></tr>
+    {% for approval in approvals %}
+    <tr>
+      <td class="risk-{{ approval.risk }}">{{ approval.risk }}</td>
+      <td>{{ approval.action_type }}</td>
+      <td>{{ approval.summary }}</td>
+      <td>
+        <form class="inline" method="post" action="/dashboard/approvals/{{ approval.id }}/approve">
+          <button class="approve" type="submit">Approve</button>
+        </form>
+        <form class="inline" method="post" action="/dashboard/approvals/{{ approval.id }}/reject">
+          <button class="reject" type="submit">Reject</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="empty">Nothing pending.</p>
+  {% endif %}
+
+  <h2>Submit a command</h2>
+  <form class="command-form" method="post" action="/dashboard/commands">
+    <input type="text" name="text" placeholder='e.g. "find 5 qualified plumbing leads"' required>
+    <button type="submit">Send</button>
+  </form>
+  <p><em>Submitting only queues the command for the Chief of Staff — a worker process
+  (<code>python -m worker.runner</code>) has to be running for it to actually resolve.
+  Reload this page to see updates.</em></p>
+
+  <h2>Recent commands</h2>
+  {% if commands %}
+  <table>
+    <tr><th>When</th><th>Status</th><th>Command</th><th>Response</th></tr>
+    {% for command in commands %}
+    <tr>
+      <td>{{ command.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td>{{ command.status }}</td>
+      <td>{{ command.raw_text }}</td>
+      <td>{{ command.response.splitlines()[0] if command.response else "" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="empty">No commands yet.</p>
+  {% endif %}
+</body>
+</html>
