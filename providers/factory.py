@@ -11,6 +11,7 @@ from functools import lru_cache
 
 from config.settings import get_settings
 from core.errors import PermanentError
+from providers.anthropic_llm import AnthropicLLMProvider
 from providers.base import (
     CalendarProvider,
     CRMProvider,
@@ -34,7 +35,8 @@ from providers.mock import (
 def _unsupported(kind: str, name: str) -> PermanentError:
     return PermanentError(
         f"{kind} provider '{name}' is not implemented. "
-        f"Only 'mock' exists today; real providers land in Milestone 8."
+        f"Only 'mock' (every provider) and 'anthropic' (LLM only, Milestone 8) exist "
+        f"today; the rest land as Milestone 8 continues, one provider at a time."
     )
 
 
@@ -43,6 +45,10 @@ def get_llm_provider() -> LLMProvider:
     settings = get_settings()
     if settings.llm_provider == "mock":
         return MockLLMProvider(seed=settings.mock_seed)
+    if settings.llm_provider == "anthropic":
+        return AnthropicLLMProvider(
+            api_key=settings.anthropic_api_key, model=settings.anthropic_model
+        )
     raise _unsupported("LLM", settings.llm_provider)
 
 

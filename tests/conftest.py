@@ -18,6 +18,20 @@ os.environ.setdefault(
     ),
 )
 os.environ.setdefault("DRY_RUN", "true")
+# The suite must be hermetic regardless of a developer's local .env — a real provider
+# configured there (e.g. LLM_PROVIDER=anthropic for Milestone 8's manual verification)
+# must never leak into what the tests exercise. Environment variables outrank .env file
+# values in pydantic-settings' resolution order, so setting these here overrides it.
+for _provider_kind in (
+    "LLM",
+    "WEB_RESEARCH",
+    "LEAD_DISCOVERY",
+    "EMAIL",
+    "CRM",
+    "CALENDAR",
+    "PAYMENT",
+):
+    os.environ.setdefault(f"{_provider_kind}_PROVIDER", "mock")
 
 from collections.abc import Iterator, Mapping  # noqa: E402
 from typing import Any  # noqa: E402

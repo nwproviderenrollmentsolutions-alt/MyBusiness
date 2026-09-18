@@ -108,6 +108,9 @@ class Settings(BaseSettings):
     mock_seed: int = 1337
 
     anthropic_api_key: str = ""
+    #: Only consulted when llm_provider=anthropic. See providers/anthropic_llm.py for
+    #: which models this is known to behave correctly with.
+    anthropic_model: str = "claude-opus-5"
 
     worker_poll_interval_seconds: float = 1.0
     worker_batch_size: int = 5
