@@ -15,6 +15,8 @@ from providers.mock.email import MockEmailProvider
 from providers.mock.lead_discovery import MockLeadDiscoveryProvider
 from providers.mock.llm import MockLLMProvider
 from providers.mock.payment import MockPaymentProvider
+from providers.mock.video_gen import MockVideoGenProvider
+from providers.mock.voice import MockVoiceProvider
 from providers.mock.web_research import MockWebResearchProvider
 
 __all__ = [
@@ -24,5 +26,7 @@ __all__ = [
     "MockLLMProvider",
     "MockLeadDiscoveryProvider",
     "MockPaymentProvider",
+    "MockVideoGenProvider",
+    "MockVoiceProvider",
     "MockWebResearchProvider",
 ]

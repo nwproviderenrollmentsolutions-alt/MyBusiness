@@ -94,6 +94,19 @@ prevention via idempotency keys, a campaign kill switch, and a global emergency 
 re-checked at the moment of send, not just when a draft was first approved, so a
 suppression or kill switch that arrives in between still blocks it.
 
+## AI UGC Viral Cloner
+
+A separate, standalone capability: turns a viral short-form video into a production-ready
+ad (script, shot list, generation prompts) for the CEO's own locked AI avatar clone — never
+a substitute presenter. File-based, no database, not yet wired into the agent runtime
+above. See [ugc_cloner/README.md](ugc_cloner/README.md) for the pipeline, the avatar lock,
+and what's real vs. stubbed (video/voice rendering).
+
+```bash
+python -m ugc_cloner.cli init-avatar
+python -m ugc_cloner.cli build --product "..." --objective "..." --description "..."
+```
+
 ## Setup
 
 ```bash
