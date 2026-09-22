@@ -1,0 +1,28 @@
+# Framework template — copy this file to `<slug>.yaml` in the matching
+# viral-library/ category folder (frameworks/, hooks/, UGC/, talking-head/,
+# product-demo/, storytelling/, problem-solution/, reaction/, testimonial/,
+# or before-after/) and fill in each field.
+#
+# `evidence` must be one of:
+#   OBSERVED — taken directly from a specific reference video or research finding
+#   INFERRED — a reasonable pattern drawn from general knowledge of the format,
+#              not tied to one specific observed video
+#   UNKNOWN  — no evidence available; do not fabricate a value to fill this in
+#
+# Leave a field blank (not invented) if it isn't known yet.
+
+framework:
+  name:
+  source:
+  date_analyzed:
+  platform:
+  video_length:
+  hook:
+  structure:
+  pacing:
+  shot_pattern:
+  editing_pattern:
+  cta:
+  why_it_may_work:
+  evidence:
+  adaptation_notes:

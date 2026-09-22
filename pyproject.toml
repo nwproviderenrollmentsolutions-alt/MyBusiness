@@ -33,7 +33,7 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["config", "core", "db", "providers", "agents", "api", "worker", "cli"]
+packages = ["config", "core", "db", "providers", "agents", "api", "worker", "cli", "ugc_cloner"]
 
 [tool.ruff]
 line-length = 100
@@ -58,7 +58,7 @@ plugins = ["pydantic.mypy"]
 # Application code is strictly typed. Tests are asserted behavior, not a public API, and
 # annotating every fixture adds noise without catching bugs. Covers both tests/ and each
 # agent's own agents/<name>/tests/ package.
-module = ["tests.*", "agents.*.tests.*"]
+module = ["tests.*", "agents.*.tests.*", "ugc_cloner.tests.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 disallow_untyped_calls = false
@@ -67,7 +67,9 @@ check_untyped_defs = false
 [tool.pytest.ini_options]
 # Cross-cutting infra tests live under tests/; each agent's own tests live next to its
 # code in agents/<name>/tests/, per the per-agent package layout in ARCHITECTURE.md.
-testpaths = ["tests", "agents"]
+# ugc_cloner/tests/ is a third location: that package is filesystem-based and has no
+# database dependency, so its tests need no Postgres and no `-m integration` marker.
+testpaths = ["tests", "agents", "ugc_cloner"]
 markers = [
     "integration: requires a live Postgres database",
 ]

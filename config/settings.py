@@ -105,6 +105,8 @@ class Settings(BaseSettings):
     crm_provider: str = "mock"
     calendar_provider: str = "mock"
     payment_provider: str = "mock"
+    video_gen_provider: str = "mock"
+    voice_provider: str = "mock"
     mock_seed: int = 1337
 
     anthropic_api_key: str = ""

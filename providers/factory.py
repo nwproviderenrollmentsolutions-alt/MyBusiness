@@ -19,6 +19,8 @@ from providers.base import (
     LeadDiscoveryProvider,
     LLMProvider,
     PaymentProvider,
+    VideoGenProvider,
+    VoiceProvider,
     WebResearchProvider,
 )
 from providers.mock import (
@@ -28,6 +30,8 @@ from providers.mock import (
     MockLeadDiscoveryProvider,
     MockLLMProvider,
     MockPaymentProvider,
+    MockVideoGenProvider,
+    MockVoiceProvider,
     MockWebResearchProvider,
 )
 
@@ -100,6 +104,22 @@ def get_payment_provider() -> PaymentProvider:
     raise _unsupported("Payment", settings.payment_provider)
 
 
+@lru_cache(maxsize=1)
+def get_video_gen_provider() -> VideoGenProvider:
+    settings = get_settings()
+    if settings.video_gen_provider == "mock":
+        return MockVideoGenProvider(seed=settings.mock_seed)
+    raise _unsupported("Video generation", settings.video_gen_provider)
+
+
+@lru_cache(maxsize=1)
+def get_voice_provider() -> VoiceProvider:
+    settings = get_settings()
+    if settings.voice_provider == "mock":
+        return MockVoiceProvider(seed=settings.mock_seed)
+    raise _unsupported("Voice", settings.voice_provider)
+
+
 def all_providers_are_mock() -> bool:
     """Used by the dashboard to state plainly whether anything real is wired up."""
     return all(
@@ -112,6 +132,8 @@ def all_providers_are_mock() -> bool:
             get_crm_provider(),
             get_calendar_provider(),
             get_payment_provider(),
+            get_video_gen_provider(),
+            get_voice_provider(),
         )
     )
 
@@ -126,5 +148,7 @@ def reset_providers() -> None:
         get_crm_provider,
         get_calendar_provider,
         get_payment_provider,
+        get_video_gen_provider,
+        get_voice_provider,
     ):
         factory.cache_clear()
