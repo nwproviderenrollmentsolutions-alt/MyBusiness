@@ -1,0 +1,21 @@
+framework:
+  name: "Stop Doing X"
+  source: "UGC Viral Cloner spec, Phase 3 (Framework B) — a named pattern from the spec, not extracted from a specific reference video"
+  date_analyzed: "2026-09-22"
+  platform: "UNKNOWN — described in the spec as a generic short-form pattern (TikTok / Reels / Shorts), not tied to one platform"
+  video_length: "UNKNOWN"
+  hook: "A pattern interrupt naming a common mistake the viewer is probably making (\"Stop doing X\")."
+  structure: |
+    Pattern interrupt
+      -> Common mistake (name it)
+      -> Better solution
+      -> Demonstration
+      -> Result
+      -> CTA
+  pacing: "UNKNOWN — no timestamped reference video behind this entry; treat the structure above as a beat order, not a timed template."
+  shot_pattern: "UNKNOWN — not derived from shot-by-shot analysis of a specific video."
+  editing_pattern: "UNKNOWN — not derived from cut/caption analysis of a specific video."
+  cta: "Follows the demonstrated result; tells the viewer what to do instead."
+  why_it_may_work: "Calling out a mistake by name creates an immediate 'is this me?' pattern interrupt, and contrasting it with a demonstrated better solution gives the viewer a concrete reason to keep watching and act."
+  evidence: INFERRED
+  adaptation_notes: "Name a mistake genuinely relevant to the product's category; keep the mistake -> better-solution -> demonstration order; perform in the locked avatar's own voice and delivery style — do not borrow footage, phrasing, or likeness from any specific creator."
