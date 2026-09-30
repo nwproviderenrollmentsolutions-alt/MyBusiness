@@ -1,0 +1,44 @@
+framework:
+  name: "Scenario Drop-In (POV Open)"
+  source: "Clustered from 2026 performance-marketing commentary contrasting
+    scenario-based UGC opens against direct-testimonial opens (search results
+    summarizing RevenueCat's \"UGC Ads for Apps\" and related 2026 UGC-hook guides).
+    General-knowledge web search, not a specific observed reference video."
+  date_analyzed: "2026-09-28"
+  platform: "TikTok and Instagram Reels. Sources note Reels penalizes a slow-burn
+    intro harder than TikTok: hook by ~1.0s with the payoff promise landing by ~3.0s
+    on Reels, versus ~1.5s with slightly more setup tolerance on TikTok."
+  video_length: "UNKNOWN — no total runtime given in sources."
+  hook: "Opens mid-scene, dropping the viewer straight into a recognizable moment
+    (a changing room, a desk at 11pm, mid-grocery-run) instead of a to-camera
+    testimonial opener. Sources report this scenario-based hook consistently
+    outperforming a direct-testimonial open on ROAS even with an identical
+    underlying script — described as a comparison finding in the source material,
+    not something this session observed directly."
+  structure: |
+    Scenario drop-in — viewer placed inside a recognizable moment, no preamble
+      -> Problem reveal — the moment makes the pain point obvious without narrating it
+      -> Product moment — product enters the scene naturally, in-context
+      -> Payoff — the scenario resolves (relief, result, or reaction)
+      -> CTA — native, low-pressure close
+  pacing: "Reels: hook resolved by ~1.0s, payoff promise visible by ~3.0s. TikTok:
+    hook by ~1.5s, marginally more tolerance for a beat of visual setup before the
+    payoff promise. Both figures are the sources' general platform guidance, not
+    measurements from a specific ad."
+  shot_pattern: "Handheld, in-scene camera consistent with the dropped-in moment
+    (phone-held, natural framing) — inferred from the format's description as
+    'native' rather than to-camera; not derived from a specific shot-by-shot video."
+  editing_pattern: "UNKNOWN — sources describe the hook framing, not a specific
+    cut/caption recipe."
+  cta: "Native and low-pressure rather than a hard pitch — sources contrast this
+    with performative, broadcast-style CTAs; exact CTA wording not given in sources."
+  why_it_may_work: "Dropping the viewer into a scene they immediately recognize
+    substitutes lived-in specificity for a stated claim, which sources link to the
+    ROAS advantage over a direct-testimonial open using the same script — the
+    scenario itself does the persuading before the pitch even starts."
+  evidence: INFERRED
+  adaptation_notes: "Pick a scene the target audience will recognize on sight (a
+    specific time of day, a specific mundane setting) rather than a generic
+    'someone using the product' shot. Perform in the locked avatar's own voice and
+    delivery style; do not borrow footage, phrasing, or likeness from any specific
+    creator or the source articles' own examples."

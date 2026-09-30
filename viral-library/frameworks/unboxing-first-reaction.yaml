@@ -1,0 +1,45 @@
+framework:
+  name: "Unboxing / First Reaction"
+  source: "Clustered from 2026 UGC-format overviews describing unboxing/haul content
+    as a recurring, high-converting UGC ad category (search results summarizing
+    pixis.ai \"UGC in 2026\", billo.app \"15 UGC Video Examples\", and related
+    2026 guides). General-knowledge web search, not a specific observed reference
+    video."
+  date_analyzed: "2026-09-28"
+  platform: "TikTok and Instagram Reels, vertical 9:16, sources describe this as
+    typically under 60 seconds."
+  video_length: "Sources describe 'under 60 seconds' as typical; no single reference
+    runtime given."
+  hook: "The reveal moment itself (opening the package / first use) functions as the
+    hook — sources emphasize the pause right before the reaction and a genuine
+    micro-expression as the thing that reads as authentic, versus a prepared
+    statement."
+  structure: |
+    Reveal — package or product opened / first encountered on camera
+      -> First use — product tried for the first time
+      -> Reaction — the genuine, unscripted response (surprise, delight, etc.)
+      -> CTA — typically minimal (link / swipe reference)
+  pacing: "Sources describe feed-speed editing: quick cuts, on-screen captions, and
+    an early visual payoff rather than a slow build; this is general platform
+    guidance, not timestamps from one observed video."
+  shot_pattern: "Phone-shot, casual framing, home or office setting, hands-on
+    product use — per sources' description of typical production cues for this
+    format; not derived from a specific shot-by-shot video."
+  editing_pattern: "Quick cuts synced to the reaction beat, captions carrying context
+    the voiceover doesn't state outright — inferred from sources' 'feed speed'
+    description, not a specific cut list."
+  cta: "Sources describe this format as converting on the strength of the authentic
+    reaction itself, with a comparatively light CTA (link/swipe) rather than a hard
+    pitch."
+  why_it_may_work: "A genuine reaction is difficult to fake convincingly, so sources
+    frame this format's persuasive power as coming from the viewer trusting the
+    unscripted moment — the format works against DTC categories where packaging,
+    size, or first impression is itself part of the product's appeal (beauty,
+    electronics, apparel, per sources)."
+  evidence: INFERRED
+  adaptation_notes: "Fit is strongest for products where a physical unboxing or
+    visible first-use moment exists; weaker for services/software with no physical
+    reveal. Keep the reaction beat unscripted-feeling rather than overacted. Perform
+    in the locked avatar's own voice and delivery style; do not borrow footage,
+    phrasing, or likeness from any specific creator or the source articles' own
+    examples."

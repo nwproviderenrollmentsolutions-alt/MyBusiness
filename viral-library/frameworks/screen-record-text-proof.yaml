@@ -1,0 +1,52 @@
+framework:
+  name: "Screen-Recording / Text-Thread Proof"
+  source: "Clustered from TikTok's own topic pages for 'screen recording text
+    messages' and 'TikTok trends with text on the screen', which describe
+    screen-recorded message threads and pure on-screen-text videos as a recurring
+    native TikTok content type. A search snippet also referenced a specific
+    text-only video reportedly exceeding 7 million views; that figure is a
+    third-party claim this session could not verify against a real analytics
+    provider, so it is recorded here as UNKNOWN, not as an observed fact about this
+    framework."
+  date_analyzed: "2026-09-28"
+  platform: "TikTok primarily; format is text/screen-recording-native so less
+    naturally suited to a voiced Reels/Shorts delivery without adaptation."
+  video_length: "UNKNOWN — the one specific example surfaced in search was described
+    as roughly 6-7 seconds, but that is a single unverified data point, not a
+    general runtime for the framework."
+  hook: "No spoken hook — the video opens directly on an on-screen text message,
+    caption, or screen-recorded chat thread revealing a recommendation, result, or
+    surprising exchange. The hook is entirely visual/textual, no talking-head beat."
+  structure: |
+    Text/message reveal — a screen-recorded thread or on-screen caption states the
+      premise (a friend's recommendation, a surprising exchange, a result)
+      -> Context beat — brief additional text or a single reaction shot filling in
+         why this exchange matters
+      -> Product callout — the product is named/shown as the subject of the
+         recommendation or result
+      -> CTA — usually delivered as on-screen text or caption rather than spoken
+  pacing: "Sources describe this as an extremely fast, text-only format (single
+    unverified example cited at ~6-7 seconds); an ad adaptation would need to add a
+    product beat, which necessarily extends runtime beyond the purest organic
+    version — no verified pacing data exists for that adapted, longer form."
+  shot_pattern: "Primarily a static or near-static screen recording / text card;
+    little to no traditional camera work in the purest version of this format."
+  editing_pattern: "Sequential text/caption reveals timed to reading speed rather
+    than traditional video cuts; UNKNOWN beyond this general description."
+  cta: "On-screen text or caption prompt (e.g. a final card naming the product or a
+    link reference) rather than a spoken call to action, consistent with the
+    format's no-talking premise."
+  why_it_may_work: "Presenting a recommendation as something the viewer is
+    'overhearing' (a real text thread) rather than being told directly borrows the
+    credibility of a private, unstaged conversation — sources frame this as one
+    reason text-only/screen-recorded formats have performed well on TikTok, though
+    no verified performance data specific to an ad adaptation was found."
+  evidence: UNKNOWN
+  adaptation_notes: "Treat this as the least evidenced of the five entries in this
+    scan — worth a small test before wider investment, and do not cite the ~7M-view
+    figure surfaced in search as a claim about how this framework performs, since it
+    describes one unverified, unrelated organic video, not an ad using this
+    structure. If adapting to include the avatar, keep the text-thread reveal
+    intact and add the avatar only for the product-callout beat, in the avatar's own
+    voice; do not borrow footage, phrasing, or likeness from any specific creator or
+    the source pages' own examples."

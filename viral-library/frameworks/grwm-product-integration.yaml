@@ -1,0 +1,41 @@
+framework:
+  name: "Get Ready With Me (GRWM) Product Integration"
+  source: "Clustered from 2026 UGC ad guides describing GRWM as a recurring
+    lifestyle-integration format (search results summarizing wboc.com \"UGC
+    Facebook Ad Examples\" and related 2026 UGC-format overviews). General-knowledge
+    web search, not a specific observed reference video."
+  date_analyzed: "2026-09-28"
+  platform: "TikTok and Instagram Reels — sources describe GRWM as a native format
+    on both, generally in the routine/lifestyle content category."
+  video_length: "UNKNOWN — no runtime given in sources; GRWM videos vary widely in
+    length depending on the routine shown."
+  hook: "The routine itself is the hook — the format opens as ordinary daily-routine
+    content, not a product pitch, which is the mechanism sources credit for its
+    performance (it doesn't read as an ad in the first few seconds)."
+  structure: |
+    Routine opener — ordinary daily-routine framing (getting ready, morning routine)
+      -> Product folded in — product appears as one step in the routine, not the
+         subject of the video
+      -> Casual benefit mention — the presenter mentions why they use it, in passing
+      -> CTA — soft, conversational, near the end
+  pacing: "Lifestyle pacing — slower and more conversational than a pattern-interrupt
+    hook format, matching the routine's natural rhythm; general characterization from
+    sources, not timestamps from a specific video."
+  shot_pattern: "UNKNOWN — sources describe the format's framing (routine, in-context
+    product use) but not a specific shot-by-shot breakdown."
+  editing_pattern: "UNKNOWN — not derived from a specific video's cut/caption
+    analysis."
+  cta: "Soft and conversational, delivered near the end as part of the routine's
+    natural wind-down rather than a hard pitch — per sources' description of GRWM's
+    low-pressure tone."
+  why_it_may_work: "Because the product appears as a natural part of a lifestyle
+    moment rather than the centerpiece of a commercial pitch, sources describe
+    viewers processing it as routine content first and an ad second (or not at all),
+    which lowers the ad-recognition resistance that harder-sell formats trigger."
+  evidence: INFERRED
+  adaptation_notes: "Best fit for beauty, personal care, and morning/evening-routine
+    adjacent products; weak fit for products with no natural place in a daily
+    routine. Keep the product mention genuinely incidental rather than a scripted-
+    sounding aside. Perform in the locked avatar's own voice and delivery style; do
+    not borrow footage, phrasing, or likeness from any specific creator or the
+    source articles' own examples."

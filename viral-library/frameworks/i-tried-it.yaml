@@ -1,0 +1,21 @@
+framework:
+  name: "I Tried It"
+  source: "UGC Viral Cloner spec, Phase 3 (Framework C) — a named pattern from the spec, not extracted from a specific reference video"
+  date_analyzed: "2026-09-22"
+  platform: "UNKNOWN — described in the spec as a generic short-form pattern (TikTok / Reels / Shorts), not tied to one platform"
+  video_length: "UNKNOWN"
+  hook: "A claim being put to the test (\"I tried it so you don't have to\" style framing)."
+  structure: |
+    Claim
+      -> Experiment
+      -> Live demonstration
+      -> Reaction
+      -> Result
+      -> Recommendation / CTA
+  pacing: "UNKNOWN — no timestamped reference video behind this entry; treat the structure above as a beat order, not a timed template."
+  shot_pattern: "UNKNOWN — not derived from shot-by-shot analysis of a specific video."
+  editing_pattern: "UNKNOWN — not derived from cut/caption analysis of a specific video."
+  cta: "A recommendation tied directly to the demonstrated result (try it / don't / here's how)."
+  why_it_may_work: "Framing the video as a live experiment with a genuine reaction reads as more authentic than a scripted pitch, and the claim-to-result arc gives the viewer a clear reason to watch through to the payoff."
+  evidence: INFERRED
+  adaptation_notes: "The claim being tested should be one real users actually ask about the product; keep the reaction genuine rather than overacted; perform in the locked avatar's own voice and delivery style — do not borrow footage, phrasing, or likeness from any specific creator."
