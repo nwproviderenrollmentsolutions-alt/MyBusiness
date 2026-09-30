@@ -1,0 +1,48 @@
+framework:
+  name: "Relatable Problem, Specific Solution (Problem-Agitate-Solve)"
+  source: "Clustered from multiple 2026 UGC/performance-marketing guides describing a
+    recurring pattern across TikTok and Meta UGC ads (not one specific reference video):
+    rathlymarketing.com \"What is the best structure for a UGC ad\", sparkugc.com
+    \"The UGC Ad Script Structure: Hook, Body, CTA\", and inreels.ai \"3 UGC Ad Script
+    Structures That Work\". General-knowledge web search, no non-mock analytics
+    provider connected to this pipeline yet."
+  date_analyzed: "2026-09-28"
+  platform: "TikTok and Meta (Reels/Feed) — sources describe this as a cross-platform
+    pattern, with Meta favoring a more direct pain-point opener and TikTok tolerating
+    slightly more scene-setting."
+  video_length: "UNKNOWN — sources describe beat timing, not a single total runtime;
+    the beat timings below imply roughly 20-30s."
+  hook: "Opens on the problem/failure state itself, delivered in a tired or slightly
+    exasperated tone rather than performative excitement (e.g. \"I was so tired of
+    spending $200/month on stuff that did nothing\"). Sources say specificity is the
+    differentiator between a hook that works and one that reads as generic."
+  structure: |
+    Hook — state the specific problem/pain (0-3s)
+      -> Agitate — deepen the pain with a vivid, specific detail, one more beat of
+         "this is exactly my life" (3-8s)
+      -> Solution/demo — introduce the product as the answer to that exact pain,
+         show it being used (8-20s)
+      -> Proof — a result or before/after beat
+      -> CTA — final beat (last 3-5s)
+  pacing: "General guidance across sources, not from a timestamped reference video: a
+    visual reset (cut / zoom / new angle / new caption / b-roll insert) roughly every
+    3-5 seconds to hold retention; CTA confined to the final 3-5 seconds."
+  shot_pattern: "UNKNOWN — not derived from shot-by-shot analysis of a specific video;
+    sources describe beats, not camera setups."
+  editing_pattern: "UNKNOWN — sources reference cut frequency (every 3-5s) but not a
+    specific caption/cut recipe tied to one video."
+  cta: "Soft, peer-to-peer phrasing rather than a hard sell — sources give the example
+    \"check it out if you're dealing with the same thing\" — placed in the final 3-5
+    seconds."
+  why_it_may_work: "Naming the viewer's exact pain in the hook (not a generic version
+    of it) creates the 'this person gets exactly what I'm dealing with' recognition
+    that sources say drives watch-through; the agitate beat pays that off before the
+    product appears, so the product reads as an answer to an already-established
+    problem rather than an unprompted pitch."
+  evidence: INFERRED
+  adaptation_notes: "Works best for products that save time, money, or frustration —
+    per sources, weakest when the audience doesn't already recognize the problem.
+    Keep the pain-point specificity high (a concrete dollar figure, a concrete daily
+    annoyance) rather than a vague complaint. Perform in the locked avatar's own voice
+    and delivery style; do not borrow footage, phrasing, or likeness from any specific
+    creator or the source articles' own examples."

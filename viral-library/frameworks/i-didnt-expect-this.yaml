@@ -1,0 +1,20 @@
+framework:
+  name: "I Didn't Expect This"
+  source: "UGC Viral Cloner spec, Phase 3 (Framework A) — a named pattern from the spec, not extracted from a specific reference video"
+  date_analyzed: "2026-09-22"
+  platform: "UNKNOWN — described in the spec as a generic short-form pattern (TikTok / Reels / Shorts), not tied to one platform"
+  video_length: "UNKNOWN"
+  hook: "\"I didn't think this would actually work...\" — opens on skepticism/doubt to create curiosity about the reveal that follows."
+  structure: |
+    Hook (skeptical opener)
+      -> Problem (explain the frustration that led here)
+      -> Demonstration (show the product)
+      -> Payoff (reveal the unexpected result)
+      -> CTA (tell the viewer what to do next)
+  pacing: "UNKNOWN — no timestamped reference video behind this entry; treat the structure above as a beat order, not a timed template."
+  shot_pattern: "UNKNOWN — not derived from shot-by-shot analysis of a specific video."
+  editing_pattern: "UNKNOWN — not derived from cut/caption analysis of a specific video."
+  cta: "Direct instruction telling the viewer what to do next (e.g. try it, follow the link, comment)."
+  why_it_may_work: "The doubt-to-reveal arc sets up curiosity in the hook and pays it off with an unexpected result, a pattern-interrupt shape common across UGC ad examples."
+  evidence: INFERRED
+  adaptation_notes: "Swap 'this' for the product/category being promoted; keep the doubt-to-reveal arc intact; perform in the locked avatar's own voice and delivery style — do not borrow footage, phrasing, or likeness from any specific creator."
