@@ -114,6 +114,16 @@ class Settings(BaseSettings):
     #: which models this is known to behave correctly with.
     anthropic_model: str = "claude-opus-5"
 
+    #: Only consulted when video_gen_provider=heygen. avatar_id comes from training the
+    #: CEO's avatar in HeyGen first — see providers/heygen_video_gen.py.
+    heygen_api_key: str = ""
+    heygen_avatar_id: str = ""
+
+    #: Only consulted when voice_provider=elevenlabs. voice_id comes from cloning the
+    #: CEO's voice in ElevenLabs first — see providers/elevenlabs_voice.py.
+    elevenlabs_api_key: str = ""
+    elevenlabs_voice_id: str = ""
+
     worker_poll_interval_seconds: float = 1.0
     worker_batch_size: int = 5
     task_lease_seconds: int = 300
