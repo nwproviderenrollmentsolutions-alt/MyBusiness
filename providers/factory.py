@@ -23,6 +23,8 @@ from providers.base import (
     VoiceProvider,
     WebResearchProvider,
 )
+from providers.elevenlabs_voice import ElevenLabsVoiceProvider
+from providers.heygen_video_gen import HeyGenVideoGenProvider
 from providers.mock import (
     MockCalendarProvider,
     MockCRMProvider,
@@ -39,8 +41,8 @@ from providers.mock import (
 def _unsupported(kind: str, name: str) -> PermanentError:
     return PermanentError(
         f"{kind} provider '{name}' is not implemented. "
-        f"Only 'mock' (every provider) and 'anthropic' (LLM only, Milestone 8) exist "
-        f"today; the rest land as Milestone 8 continues, one provider at a time."
+        f"Only 'mock' (every provider), 'anthropic' (LLM), 'heygen' (video generation), "
+        f"and 'elevenlabs' (voice) exist today; the rest land one provider at a time."
     )
 
 
@@ -109,6 +111,10 @@ def get_video_gen_provider() -> VideoGenProvider:
     settings = get_settings()
     if settings.video_gen_provider == "mock":
         return MockVideoGenProvider(seed=settings.mock_seed)
+    if settings.video_gen_provider == "heygen":
+        return HeyGenVideoGenProvider(
+            api_key=settings.heygen_api_key, avatar_id=settings.heygen_avatar_id
+        )
     raise _unsupported("Video generation", settings.video_gen_provider)
 
 
@@ -117,6 +123,10 @@ def get_voice_provider() -> VoiceProvider:
     settings = get_settings()
     if settings.voice_provider == "mock":
         return MockVoiceProvider(seed=settings.mock_seed)
+    if settings.voice_provider == "elevenlabs":
+        return ElevenLabsVoiceProvider(
+            api_key=settings.elevenlabs_api_key, default_voice_id=settings.elevenlabs_voice_id
+        )
     raise _unsupported("Voice", settings.voice_provider)
 
 

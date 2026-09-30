@@ -15,6 +15,10 @@ would generate a presenter raises `ugc_cloner.avatar.AvatarLockError` with:
 > AVATAR REQUIRED: The approved AI clone reference is missing. Upload or connect the
 > user's approved avatar reference before generating the presenter.
 
+See `avatar/UPLOAD_INSTRUCTIONS.md` for exactly what to upload and the recommended
+vendor pairing (HeyGen for video, ElevenLabs for voice) to go from locked-but-mocked to
+actually rendering.
+
 `ugc_cloner/qc.py` checks this mechanically on every run, too: it's a blocker if any
 generated prompt doesn't name the locked avatar or is missing one of its negative
 constraints (`different person`, `stock actor`, `celebrity likeness`, ...).
@@ -23,7 +27,7 @@ constraints (`different person`, `stock actor`, `celebrity likeness`, ...).
 
 ```bash
 python -m ugc_cloner.cli init-avatar          # scaffolds avatar/, writes the profile template
-# ... fill in avatar/avatar-profile.md, add a file under avatar/reference-images/ ...
+# ... follow avatar/UPLOAD_INSTRUCTIONS.md: reference photo/video, voice sample, profile ...
 python -m ugc_cloner.cli avatar-status        # confirms the lock is satisfied
 
 python -m ugc_cloner.cli build \
@@ -76,7 +80,8 @@ LLM providers can never produce `OBSERVED` — see `research.py` and `qc.py`.
 | Creative scoring | Real, rule-based (same approach as `agents/lead_scoring/`) |
 | Script adaptation | Real copy when `LLM_PROVIDER=anthropic`; a clearly labeled stub marker otherwise |
 | Shot plan, generation prompts, voice prompts | Real — pure templating, avatar lock baked into every prompt |
-| Video rendering / voice synthesis | **Stubbed.** `providers/mock/video_gen.py` and `providers/mock/voice.py` queue nothing and render nothing. No real vendor (Kling, Sora, Veo, ElevenLabs, ...) is wired up — `providers/base.py` defines `VideoGenProvider`/`VoiceProvider` protocols so one can be added the same way `providers/anthropic_llm.py` was added for the LLM, once a vendor is picked and its API key is set in `.env` |
+| Video rendering | Real when `VIDEO_GEN_PROVIDER=heygen` and `HEYGEN_API_KEY`/`HEYGEN_AVATAR_ID` are set (`providers/heygen_video_gen.py`); mock queues nothing otherwise |
+| Voice synthesis | Real when `VOICE_PROVIDER=elevenlabs` and `ELEVENLABS_API_KEY`/`ELEVENLABS_VOICE_ID` are set (`providers/elevenlabs_voice.py`); mock synthesizes nothing otherwise |
 
 ## Why standalone (not a `core.agent_base.Agent`)
 
