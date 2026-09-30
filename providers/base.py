@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, Field
 
@@ -121,6 +121,25 @@ class CRMResponse(ProviderResponse):
     synced: bool = False
 
 
+class VideoAsset(ProviderResponse):
+    """One rendered shot or clip. ``asset_url`` is empty when a provider only queued the
+    render — callers must not assume synchronous completion."""
+
+    status: Literal["queued", "rendering", "ready", "failed"]
+    asset_url: str | None = None
+    duration_seconds: float | None = None
+    provider_job_id: str | None = None
+    error: str | None = None
+
+
+class VoiceAsset(ProviderResponse):
+    status: Literal["queued", "ready", "failed"]
+    asset_url: str | None = None
+    duration_seconds: float | None = None
+    provider_job_id: str | None = None
+    error: str | None = None
+
+
 @runtime_checkable
 class LLMProvider(Protocol):
     name: str
@@ -206,3 +225,28 @@ class PaymentProvider(Protocol):
     def create_invoice(
         self, *, customer_email: str, amount_usd: Decimal, description: str
     ) -> PaymentResponse: ...
+
+
+@runtime_checkable
+class VideoGenProvider(Protocol):
+    """One shot in, one rendered clip out. No vendor is assumed — a real implementation
+    wraps whichever video-generation API the CEO picks (Kling, Sora, Veo, ...)."""
+
+    name: str
+    is_mock: bool
+
+    def generate_shot(
+        self,
+        *,
+        prompt: str,
+        avatar_reference_url: str | None,
+        duration_seconds: float = 8.0,
+    ) -> VideoAsset: ...
+
+
+@runtime_checkable
+class VoiceProvider(Protocol):
+    name: str
+    is_mock: bool
+
+    def synthesize(self, *, text: str, voice_id: str | None) -> VoiceAsset: ...
