@@ -1,0 +1,44 @@
+framework:
+  name: "Side-by-Side Comparison (\"Versus\")"
+  source: "Clustered from 2026 TikTok/UGC ad-format guides describing the comparison
+    format as a recurring mid-funnel pattern (search results summarizing influee.co
+    \"TikTok Ad Examples That Actually Work\" and related 2026 UGC-hook roundups).
+    General-knowledge web search, not a specific observed reference video."
+  date_analyzed: "2026-10-05"
+  platform: "Described as working on Meta and YouTube Shorts especially, usable on
+    TikTok as well — sources frame it as a cross-platform mid-funnel format rather
+    than a TikTok-native one."
+  video_length: "UNKNOWN — no runtime given in sources."
+  hook: "A direct visual/verbal comparison stated immediately, e.g. the source's own
+    example: \"Left: the $50 cream. Right: the $9 one. Same results.\" Sources say the
+    pairing of a visual side-by-side with a price or outcome gap is what creates the
+    curiosity, not either half alone."
+  structure: |
+    Hook — state the two things being compared and the gap between them (price,
+      result, effort) in one line (0-3s)
+      -> Side-by-side demonstration — show both options under the same conditions
+      -> Value point — the single clearest reason the featured option wins
+      -> Proof — a result/outcome shot
+      -> CTA — action-oriented, final beat
+  pacing: "General guidance only: sources describe this within the standard
+    hook (0-3s) / problem (3-8s) / solution-demo (8-20s) / CTA (final 3-5s) shape
+    rather than giving comparison-specific timestamps from an observed video."
+  shot_pattern: "Literal side-by-side framing (split screen or two sequential
+    matched shots of the same action) is implied by the format's name and the
+    source's own example; not derived from a specific shot-by-shot video."
+  editing_pattern: "UNKNOWN — not derived from a specific video's cut/caption
+    analysis."
+  cta: "Sources report action-oriented copy (\"Shop Now\", \"Get Yours\", \"Start Free
+    Trial\") outperforming passive copy (\"Learn More\") on direct-response TikTok
+    formats generally, not specific to this comparison format alone."
+  why_it_may_work: "A comparison lets the viewer reach the conclusion themselves from
+    a visible gap (price, effort, result) rather than being told a claim, which
+    sources link to the curiosity-plus-credibility effect that drives comparison ads'
+    use as a competitive-positioning, mid-funnel tool."
+  evidence: INFERRED
+  adaptation_notes: "Needs a real, fair point of comparison (a genuine price gap or
+    measurable result difference) — sources position this as a mid-funnel format for
+    an audience that already knows the category, not a cold-audience hook. Perform in
+    the locked avatar's own voice and delivery style; do not borrow footage, phrasing,
+    or likeness from any specific creator or the source articles' own examples, and
+    do not name or depict a real competing brand/product."

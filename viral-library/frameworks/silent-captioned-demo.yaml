@@ -1,0 +1,47 @@
+framework:
+  name: "Silent Captioned Demo (Sound-Off)"
+  source: "Clustered from 2026 UGC-briefing articles describing silent, caption-led
+    product demos as an increasingly standard, repeatable TikTok format (search
+    results summarizing multiple 2026 posts on influencers-time.com covering
+    silent/sound-off product demos). General-knowledge web search, not a specific
+    observed reference video; treat the site cluster itself as a single secondary
+    source repeating similar guidance, not independent corroboration."
+  date_analyzed: "2026-10-05"
+  platform: "TikTok primarily, framed around sound-off viewing behavior; sources
+    describe it as applicable to Reels/Shorts as well given the same volume-off
+    viewing pattern."
+  video_length: "Sources describe a typical range of 15-45 seconds."
+  hook: "One line of on-screen text stating the problem, in the first 0-2 seconds,
+    with no voiceover needed to understand it — the hook is entirely visual/textual."
+  structure: |
+    Hook frame — on-screen text states the problem (0-2s)
+      -> Demo sequence — product in use, with short caption fragments (3-6 words
+         each) timed to each visual beat (3-12s)
+      -> Proof beat — a close-up or result shot with a text overlay stating the
+         outcome plainly (13-18s)
+      -> CTA — on-screen text/caption, consistent with the no-audio-dependency
+         premise
+  pacing: "Captions cut to each visual beat rather than to a spoken line; sources
+    give the three sub-beat timing bands above (0-2s / 3-12s / 13-18s) as general
+    briefing guidance, not measurements from one specific video."
+  shot_pattern: "Close, hands-on product-in-use framing for the demo beat, close-up
+    for the proof beat — inferred from the format's description, not a specific
+    shot-by-shot breakdown."
+  editing_pattern: "Short caption cards (3-6 words) synced to visual beats rather
+    than to narration; no voiceover track by design."
+  cta: "Delivered as on-screen text/caption rather than spoken, matching the format's
+    sound-off premise."
+  why_it_may_work: "Sources cite industry figures (commonly cited: a large majority
+    of social video is watched with sound off) to argue silent, caption-led demos
+    communicate the value proposition without depending on something much of the
+    audience never hears; sources describe it as outperforming voiceover-heavy
+    content on watch time and completion specifically because it doesn't lose
+    sound-off viewers in the first few seconds. That comparison is the sources'
+    own claim, not something this session measured directly."
+  evidence: INFERRED
+  adaptation_notes: "Works for any visually self-explanatory product action; weaker
+    for products whose value is hard to show without explanation (e.g. abstract
+    software benefits). Keep caption text terse (3-6 words) rather than restating
+    full sentences on screen. Perform in the locked avatar's own voice and delivery
+    style for any on-camera beats; do not borrow footage, phrasing, or likeness from
+    any specific creator or the source articles' own examples."

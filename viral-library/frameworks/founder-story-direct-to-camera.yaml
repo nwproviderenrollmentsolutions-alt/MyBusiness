@@ -1,0 +1,44 @@
+framework:
+  name: "Founder Story, Direct to Camera"
+  source: "Clustered from 2026 DTC/UGC ad-format guides describing the founder-story
+    format as a recurring, trust-driven pattern (search results summarizing
+    adlibrary.com \"Best DTC Meta Ads Examples 2026\" and related 2026 video-ad
+    guides). General-knowledge web search, not a specific observed reference video."
+  date_analyzed: "2026-10-05"
+  platform: "9:16 vertical, native to both TikTok and Reels per sources; framed as a
+    cold- and mid-funnel format rather than platform-specific."
+  video_length: "Sources describe 30-60 seconds — longer than most DTC UGC, which
+    sources attribute to the format relying on earned attention from a real,
+    recognizable founder rather than a fast pattern-interrupt hook."
+  hook: "The founder, on camera in a casual (not studio) setting, opens with the
+    personal problem that led them to build the product — sources give the
+    framing example \"I built this because I couldn't find X that didn't Y.\""
+  structure: |
+    Hook — founder states the personal problem that motivated the product (0-5s,
+      longer than a typical pattern-interrupt hook per sources)
+      -> Story — the founder's own experience/journey to the solution
+      -> Product reveal — direct mention of the product and what makes it different
+      -> CTA — low-pressure, trust-based rather than a hard sell
+  pacing: "General guidance only: sources describe this as a longer, slower-paced
+    format than most DTC UGC (30-60s total) because it trades a fast hook for
+    earned attention; no shot-by-shot timing given."
+  shot_pattern: "Direct-to-camera, casual setting (not a studio backdrop) — per
+    sources' description; not derived from a specific shot-by-shot video."
+  editing_pattern: "UNKNOWN — sources describe tone and pacing, not a specific
+    cut/caption recipe."
+  cta: "Sources describe this format's CTA as deliberately not a hard sell — trust
+    built through the personal story is positioned as doing the persuading, with the
+    CTA simply stating what to do and why now, rather than pressure-based language."
+  why_it_may_work: "Sources attribute this format's low fatigue rate to audiences
+    extending more trust to a real founder's personal account than to a scripted
+    pitch, and report it performing particularly well in categories where trust and
+    provenance are purchase drivers (food, wellness, supplements, baby products per
+    sources)."
+  evidence: INFERRED
+  adaptation_notes: "This format is the hardest of the library's entries to use
+    as-is with the locked avatar: it depends on being delivered by a specific real
+    founder the audience can extend trust to, which is a different claim than an
+    AI-cloned presenter performing a story. If adapted, the avatar should only speak
+    in its own voice about its own stated experience — do not have it impersonate or
+    narrate as a real founder, and do not borrow footage, phrasing, or likeness from
+    any specific creator or the source articles' own examples."
