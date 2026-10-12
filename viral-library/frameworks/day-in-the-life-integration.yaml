@@ -1,0 +1,55 @@
+framework:
+  name: "Day in the Life (DITL) Product Integration"
+  source: "Clustered from 2026 UGC ad-format and brief-writing guides describing
+    day-in-the-life vlogs as a recurring format for campaigns, especially with
+    established creators (search results summarizing hermoso.ai \"Day in the life ad
+    format\", corq.studio's TikTok strategy piece, prepublish.ai's script template,
+    and influencers-time.com's DITL briefing article). General-knowledge web search,
+    not a specific observed reference video."
+  date_analyzed: "2026-10-12"
+  platform: "TikTok and Instagram Reels; one source frames it specifically as the
+    strongest format for campaigns run with macro-tier talent rather than a
+    micro-creator/avatar-only approach."
+  video_length: "UNKNOWN total runtime — sources describe a multi-beat structure
+    (cold open + 5 further beats) rather than a single stated duration; likely
+    longer than most single-scene UGC formats in this library given the beat count."
+  hook: "A cold-open hook in roughly the first 15 seconds (per one source's script
+    template) — distinct from the sub-3-second pattern-interrupt hooks used by most
+    other entries in this library; DITL trades a fast hook for narrative immersion."
+  structure: |
+    Cold-open hook (~0-15s)
+      -> Morning routine beat
+      -> Main activity block
+      -> Midday break
+      -> Afternoon block
+      -> Evening wind-down, tying back to the opening hook near the end
+    The product should appear several times, briefly, in passing across these
+      beats — not concentrated in one dedicated "ad beat".
+  pacing: "Quick cuts and no long, uneventful sequences, especially in the morning
+    segment, per the script-template source; this is general practitioner guidance,
+    not timestamps from an observed video."
+  shot_pattern: "First-person, creator-shot montage across real locations/activities
+    through the day — per sources' description of the format; not derived from a
+    specific shot-by-shot video."
+  editing_pattern: "Each of the 5+ beats is planned as a separately shot segment
+    per one source; no further specific cut/caption recipe found."
+  cta: "Sources don't give a DITL-specific CTA placement or wording; general
+    video-ad guidance (direct, simple — \"Shop Now\"/\"Learn More\") is a reasonable
+    default, not a sourced rule for this format specifically. Treat as UNKNOWN
+    beyond that default."
+  why_it_may_work: "Sources argue the format's persuasive power comes from the
+    product reading as incidental to a real day rather than the video's subject —
+    one source frames this as a 'bolt-on' risk to avoid: a dedicated product
+    monologue breaks the mood and audiences notice the pacing/tone shift
+    immediately, with a visible view-through drop at that moment cited as the
+    diagnostic signal. The fix sources recommend is mapping the product onto the
+    creator's existing routine rather than writing the placement first."
+  evidence: INFERRED
+  adaptation_notes: "Highest execution risk in this library of the 'bolt-on' failure
+    mode described above — if adapting for the locked avatar, write the avatar's
+    'day' first and place product moments inside it, rather than writing a product
+    pitch and wrapping a day around it. Longer and more production-heavy than this
+    library's other formats, so weigh against a simpler entry for a first test.
+    Perform in the locked avatar's own voice and delivery style; do not borrow
+    footage, phrasing, or likeness from any specific creator or the source articles'
+    own examples."
